@@ -1,0 +1,6 @@
+{
+  "name": "Mac-style Web Dev Tutorial",
+  "description": "A beginner's interactive guide to HTML, CSS, JavaScript, and JSON with a macOS-style UI. Explains CSS methods, selectors, and more.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
