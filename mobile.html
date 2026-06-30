@@ -1,0 +1,2035 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script>
+/* 端末振り分け: Mac/PC/iPad は index.html(PC版)へ。スマホ(iPhone/iPod/Androidスマホ)はこのまま。 */
+(function () {
+  try {
+    var ua = navigator.userAgent || '';
+    var isIPad = /iPad/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var isPhone = !isIPad && (/iPhone|iPod/.test(ua) || (/Android/.test(ua) && /Mobile/.test(ua)));
+    if (!isPhone && location.search.indexOf('nr') === -1) {
+      var u = (location.protocol === 'file:')
+        ? 'file:///Users/s_users/Downloads/files/index.html'
+        : 'index.html';
+      location.replace(u);
+    }
+  } catch (e) {}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f2f2f7">
+<title>BEAST Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ===== 黄昏グラデーション パレット（参考画像より） ===== */
+  :root {
+    --yj-bg: #ebe1da;          /* 下半分のベージュ */
+    --yj-bg2: #d9ccc4;         /* 一段濃いベージュ */
+    --yj-surface: #f3ece5;     /* カード（さらに明るい） */
+    --yj-surface-dark: #4a4350; /* 焦藤グレー（dark surface） */
+    --yj-brown: #8a7383;       /* メイン藤茶 */
+    --yj-brown-deep: #6b5d6e;  /* 濃い藤 */
+    --yj-brown-darker: #4d4452; /* もっと濃い */
+    --yj-tan: #c9bcb4;         /* 肌ベージュ */
+    --yj-tan-light: #e0d3ca;   /* 明るいベージュ */
+    --yj-acid: #9a6878;        /* くすみピンク赤（迫真の代わり） */
+    --yj-acid-dark: #7a4f5c;   /* 暗いピンク赤 */
+    --yj-gold: #9d8f6f;        /* くすんだ金 */
+    --yj-olive: #8a8e80;       /* 上部のグリーングレー */
+    --yj-text: #2e2730;        /* 本文 */
+    --yj-text-mid: #6b5d6e;    /* 中間 */
+    --yj-text-soft: #9e8f95;   /* 薄い */
+    --yj-border: rgba(77, 68, 82, 0.14);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; height: 100%; overscroll-behavior: none; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Hiragino Sans", sans-serif;
+    background: #ebe1da;
+    color: var(--yj-text);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  code, .mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+
+  /* ===== App layout: full-bleed dusk gradient ===== */
+  .app {
+    position: fixed; inset: 0;
+    display: flex;
+    width: 100%;
+    margin: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 42%, #8a8e80 0%, #7d7585 22%, #9c8a92 48%, #c9bcb4 72%, #ebe1da 100%);
+    padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
+  }
+
+  /* ===== Content constrained to readable width, but background stays full-bleed ===== */
+  .content-wrap {
+    flex: 1;
+    max-width: 540px;
+    margin: 0 auto 0 72px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+  }
+  @media (min-width: 720px) {
+    .content-wrap {
+      margin: 0 auto;
+      padding-left: 0;
+    }
+  }
+
+  /* ===== Floating side dock ===== */
+  .dock {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(243, 236, 229, 0.55);
+    backdrop-filter: saturate(160%) blur(28px);
+    -webkit-backdrop-filter: saturate(160%) blur(28px);
+    border-radius: 100px;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 8px 24px rgba(77, 68, 82, 0.18), 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+    z-index: 50;
+    border: 0.5px solid rgba(255, 255, 255, 0.35);
+  }
+  .dock-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.08s;
+    padding: 0;
+    position: relative;
+  }
+  .dock-btn:active { transform: scale(0.92); }
+  .dock-btn.active { background: rgba(154, 104, 120, 0.15); }
+  .dock-btn img {
+    width: 28px; height: 28px;
+    object-fit: contain;
+    display: block;
+  }
+  .dock-btn .icon-fallback {
+    font-size: 22px;
+    line-height: 1;
+    color: var(--yj-text-mid);
+  }
+  .dock-btn.active .icon-fallback { color: var(--yj-acid); }
+  .dock-divider { height: 0.5px; background: var(--yj-border); margin: 2px 8px; }
+
+  /* ===== Top status bar (compact) ===== */
+  .topbar {
+    padding: 14px 18px 10px;
+    background: rgba(243, 236, 229, 0.55);
+    backdrop-filter: saturate(160%) blur(28px);
+    -webkit-backdrop-filter: saturate(160%) blur(28px);
+    border-bottom: 0.5px solid var(--yj-border);
+    flex-shrink: 0;
+    display: none;
+  }
+  .topbar.show { display: block; }
+  .topbar-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .topbar-title { font-size: 17px; font-weight: 600; margin: 0; letter-spacing: -0.01em; color: var(--yj-text); }
+  .topbar-stats { display: flex; gap: 8px; }
+  .stat-pill { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 100px; font-size: 13px; font-weight: 600; }
+  .stat-pill.streak { background: rgba(200, 160, 71, 0.22); color: var(--yj-brown-deep); }
+  .stat-pill.hearts { background: rgba(154, 104, 120, 0.18); color: var(--yj-acid-dark); font-variant-numeric: tabular-nums; }
+  .progress-bar { height: 4px; background: var(--yj-bg2); border-radius: 100px; overflow: hidden; margin-top: 10px; }
+  .progress-fill { height: 100%; background: var(--yj-brown); border-radius: 100px; transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1); width: 0%; }
+
+  /* ===== Main scrollable ===== */
+  .main { flex: 1; overflow-y: auto; padding: 16px 18px 24px; -webkit-overflow-scrolling: touch; }
+  .main::-webkit-scrollbar { width: 0; }
+
+  /* ===== Screens ===== */
+  .screen { display: none; animation: fadeUp 0.32s cubic-bezier(0.16, 1, 0.3, 1); }
+  .screen.active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ===== HOME ===== */
+  .hero { padding: 22px 0 18px; }
+  .hero-eyebrow { font-size: 12px; font-weight: 600; color: var(--yj-acid); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px; }
+  .hero-title { font-size: 32px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.05; margin: 0 0 8px; color: var(--yj-text); }
+  .hero-title em { font-style: normal; background: linear-gradient(135deg, var(--yj-acid), var(--yj-brown)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-sub { font-size: 14px; color: var(--yj-text-mid); margin: 0; line-height: 1.45; }
+
+  /* ===== Activity Ring Card ===== */
+  .activity-card {
+    background: var(--yj-surface-dark);
+    color: #fff;
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 14px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(77, 68, 82, 0.18), 0 10px 28px rgba(77, 68, 82, 0.12);
+    cursor: pointer;
+    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .activity-card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(77, 68, 82, 0.22), 0 16px 36px rgba(77, 68, 82, 0.18); }
+  .activity-card:active { transform: scale(0.985); }
+  .ring-box { width: 110px; height: 110px; position: relative; }
+  .ring-box svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+  .ring-stats { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .ring-stat { display: flex; align-items: center; gap: 8px; }
+  .ring-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 8px currentColor; }
+  .ring-stat-label { font-size: 11px; color: var(--yj-tan); text-transform: uppercase; letter-spacing: 0.04em; margin: 0; line-height: 1; }
+  .ring-stat-val { font-size: 15px; font-weight: 600; margin: 2px 0 0; line-height: 1; font-variant-numeric: tabular-nums; }
+  .ring-stat-val span { color: var(--yj-tan); font-weight: 500; }
+
+  /* Ring colors — 黄昏トーン */
+  .ring-move   { color: #9a6878; }  /* くすみピンク */
+  .ring-exer   { color: #c9bcb4; }  /* 肌ベージュ */
+  .ring-stand  { color: #9d8f6f; }  /* くすんだ金 */
+
+  .section-h { font-size: 13px; font-weight: 600; color: var(--yj-text-soft); text-transform: uppercase; letter-spacing: 0.04em; padding: 16px 4px 8px; margin: 0; }
+  .level-grid { display: grid; gap: 10px; }
+  .level-card { background: var(--yj-surface); border: none; border-radius: 24px; padding: 16px 18px; cursor: pointer; transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background 0.15s; display: flex; align-items: center; gap: 14px; text-align: left; width: 100%; font-family: inherit; box-shadow: 0 1px 2px rgba(77, 68, 82, 0.06), 0 4px 14px rgba(77, 68, 82, 0.08); color: var(--yj-text); }
+  .level-card:hover { box-shadow: 0 2px 4px rgba(77, 68, 82, 0.08), 0 8px 24px rgba(77, 68, 82, 0.14); transform: translateY(-1px); }
+  .level-card:active { transform: scale(0.98); box-shadow: 0 1px 2px rgba(77, 68, 82, 0.06), 0 2px 6px rgba(77, 68, 82, 0.08); }
+  .level-icon { width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(77, 68, 82, 0.15); }
+  .level-icon.js { background: linear-gradient(135deg, #d9ccc4, #9d8f6f); color: var(--yj-brown-darker); }
+  .level-icon.c { background: linear-gradient(135deg, #8a7383, #4d4452); color: #fff; }
+  .level-icon.mix { background: linear-gradient(135deg, #c9bcb4, #9a6878); color: #fff; }
+  .level-icon.python { background: linear-gradient(135deg, #9d8f6f, #6b5d6e); color: #fff; }
+  .level-icon.react { background: linear-gradient(135deg, #c9bcb4, #8a7383); color: #fff; }
+  .level-icon.cpp { background: linear-gradient(135deg, #9a6878, #4d4452); color: #fff; }
+  .level-icon.unity { background: linear-gradient(135deg, #2e2730, #4d4452); color: #c9bcb4; }
+  .level-body { flex: 1; min-width: 0; }
+  .level-title { font-size: 15px; font-weight: 600; margin: 0 0 2px; color: var(--yj-text); }
+  .level-desc { font-size: 13px; color: var(--yj-text-mid); margin: 0; line-height: 1.35; }
+  .level-meta { font-size: 12px; color: var(--yj-text-soft); margin-top: 4px; font-weight: 500; }
+  .chev { color: var(--yj-text-soft); font-size: 18px; flex-shrink: 0; }
+
+  /* ===== QUIZ ===== */
+  .quiz-meta { display: flex; justify-content: space-between; align-items: center; padding: 4px 4px 12px; }
+  .quiz-counter { font-size: 13px; font-weight: 600; color: var(--yj-text-mid); font-variant-numeric: tabular-nums; }
+  .quiz-back { background: none; border: none; color: var(--yj-acid); font-size: 15px; font-weight: 500; cursor: pointer; padding: 4px 0; font-family: inherit; }
+  .problem-card { background: var(--yj-surface); border-radius: 18px; padding: 16px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(77, 68, 82, 0.05), 0 4px 14px rgba(77, 68, 82, 0.08); }
+  .problem-tag { display: inline-block; font-size: 11px; font-weight: 600; color: #fff; padding: 3px 9px; border-radius: 100px; margin-bottom: 10px; letter-spacing: 0.04em; }
+  .problem-tag.js { background: var(--yj-brown); }
+  .problem-tag.c { background: var(--yj-acid); }
+  .problem-text { font-size: 15px; line-height: 1.5; font-weight: 500; margin: 0; color: var(--yj-text); }
+  .problem-text code { background: var(--yj-bg2); padding: 1px 6px; border-radius: 5px; font-size: 13px; color: var(--yj-brown-darker); }
+
+  .code-block { background: var(--yj-surface-dark); color: #d9ccc4; border-radius: 14px; padding: 14px; font-size: 13px; line-height: 1.55; margin-bottom: 12px; white-space: pre; overflow-x: auto; -webkit-overflow-scrolling: touch; box-shadow: 0 2px 8px rgba(77, 68, 82, 0.20); }
+  .code-block .kw { color: #c9a3b4; }
+  .code-block .num { color: #c8b994; }
+  .code-block .str { color: #c98a9c; }
+  .code-block .com { color: #8a808a; font-style: italic; }
+  .code-block .fn { color: #b8a8b8; }
+  .code-block .blank { display: inline-block; background: #6b5d6e; color: #ffd5b0; border-radius: 5px; padding: 0 10px; font-weight: 600; animation: blankPulse 1.6s ease-in-out infinite; }
+  @keyframes blankPulse { 0%, 100% { background: #6b5d6e; } 50% { background: #7a6470; } }
+
+  .choices { display: grid; gap: 10px; margin-bottom: 12px; }
+  .choice { background: var(--yj-surface); border: none; border-radius: 77px; padding: 16px 22px; font-size: 15px; cursor: pointer; text-align: left; transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background 0.15s; font-family: inherit; color: var(--yj-text); display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 2px rgba(77, 68, 82, 0.06), 0 4px 14px rgba(77, 68, 82, 0.09); }
+  .choice:hover { box-shadow: 0 2px 6px rgba(77, 68, 82, 0.10), 0 8px 22px rgba(77, 68, 82, 0.14); transform: translateY(-1px); }
+  .choice:active { transform: scale(0.97); box-shadow: 0 1px 2px rgba(77, 68, 82, 0.06), 0 2px 6px rgba(77, 68, 82, 0.08); }
+  .choice code { font-size: 14px; color: var(--yj-text); }
+  .choice .choice-letter { width: 26px; height: 26px; border-radius: 50%; background: var(--yj-bg2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--yj-brown-deep); flex-shrink: 0; }
+  .choice.correct { background: var(--yj-brown); box-shadow: 0 2px 6px rgba(122, 100, 112, 0.30), 0 8px 22px rgba(122, 100, 112, 0.34); }
+  .choice.correct code { color: #fff; }
+  .choice.correct .choice-letter { background: rgba(255,255,255,0.25); color: #fff; }
+  .choice.wrong { background: var(--yj-acid); box-shadow: 0 2px 6px rgba(154, 104, 120, 0.30), 0 8px 22px rgba(154, 104, 120, 0.34); }
+  .choice.wrong code { color: #fff; }
+  .choice.wrong .choice-letter { background: rgba(255,255,255,0.25); color: #fff; }
+  .choice.disabled { pointer-events: none; }
+  .choice.disabled:not(.correct):not(.wrong) { opacity: 0.4; box-shadow: none; }
+
+  /* ===== Reaction: Dynamic Island style ===== */
+  .di-region {
+    position: relative;
+    margin: 8px auto 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    min-height: 0;
+  }
+  .di-pill {
+    background: #000;
+    color: #fff;
+    border-radius: 999px;
+    padding: 12px 22px 12px 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 54px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28), 0 2px 8px rgba(0, 0, 0, 0.18);
+    transform-origin: center top;
+    animation: diExpand 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 100%;
+  }
+  @keyframes diExpand {
+    0%   { transform: scale(0.4) translateY(-8px); opacity: 0; border-radius: 999px; }
+    55%  { transform: scale(1.06) translateY(0); opacity: 1; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .di-emoji {
+    font-size: 26px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    flex-shrink: 0;
+  }
+  .di-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .di-big {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .di-big.r-correct { color: #b8e986; }
+  .di-big.r-wrong   { color: #ff9a9a; }
+  .di-sub {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+  }
+  /* Pulse accent dot for "live activity" feel */
+  .di-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink: 0;
+    margin-left: 2px;
+    animation: diPulse 1.4s ease-in-out infinite;
+  }
+  .di-dot.r-correct { background: #b8e986; box-shadow: 0 0 8px #b8e986; }
+  .di-dot.r-wrong   { background: #ff9a9a; box-shadow: 0 0 8px #ff9a9a; }
+  @keyframes diPulse {
+    0%, 100% { opacity: 0.5; transform: scale(0.85); }
+    50%      { opacity: 1;   transform: scale(1.15); }
+  }
+  /* Explanation card below the pill */
+  .di-explain {
+    font-size: 13px;
+    color: var(--yj-text);
+    background: var(--yj-surface);
+    border-radius: 16px;
+    padding: 12px 14px;
+    text-align: left;
+    line-height: 1.55;
+    width: 100%;
+    box-shadow: 0 1px 2px rgba(77, 68, 82, 0.05), 0 4px 14px rgba(77, 68, 82, 0.08);
+    animation: diSlideDown 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.12s backwards;
+  }
+  .di-explain code {
+    background: var(--yj-bg2);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 12px;
+    color: var(--yj-brown-darker);
+  }
+  @keyframes diSlideDown {
+    from { transform: translateY(-12px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  .next-btn { background: var(--yj-brown); color: #fff; border: none; border-radius: 77px; padding: 16px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; font-family: inherit; margin-top: 10px; transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s, box-shadow 0.2s; box-shadow: 0 2px 4px rgba(122, 100, 112, 0.25), 0 8px 22px rgba(122, 100, 112, 0.34); }
+  .next-btn:hover { box-shadow: 0 3px 6px rgba(122, 100, 112, 0.30), 0 12px 28px rgba(122, 100, 112, 0.38); transform: translateY(-1px); }
+  .next-btn:active { transform: scale(0.97); background: var(--yj-brown-deep); box-shadow: 0 1px 2px rgba(122, 100, 112, 0.20), 0 3px 8px rgba(122, 100, 112, 0.22); }
+  .next-btn.danger { background: var(--yj-acid); box-shadow: 0 2px 4px rgba(154, 104, 120, 0.25), 0 8px 22px rgba(154, 104, 120, 0.34); }
+  .next-btn.danger:active { background: var(--yj-acid-dark); }
+
+  /* Ring update flash on correct */
+  @keyframes ringFlash {
+    0% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
+    50% { filter: brightness(1.4) drop-shadow(0 0 12px currentColor); }
+    100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
+  }
+  .ring-arc.flash { animation: ringFlash 0.6s ease; }
+
+  /* ===== Result ===== */
+  .result-card { background: var(--yj-surface); border-radius: 22px; padding: 22px 18px; text-align: center; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(77, 68, 82, 0.10), 0 12px 32px rgba(77, 68, 82, 0.10); transition: box-shadow 0.4s, background 0.4s; }
+  .result-card.perfect {
+    background: linear-gradient(135deg, #fbf6ec 0%, #f5e6c4 50%, #e8c879 100%);
+    box-shadow:
+      0 0 0 1px rgba(200, 160, 71, 0.4),
+      0 4px 16px rgba(200, 160, 71, 0.30),
+      0 16px 48px rgba(154, 104, 120, 0.25);
+    animation: perfectGlow 2.6s ease-in-out infinite;
+  }
+  @keyframes perfectGlow {
+    0%, 100% { box-shadow: 0 0 0 1px rgba(200, 160, 71, 0.4), 0 4px 16px rgba(200, 160, 71, 0.30), 0 16px 48px rgba(154, 104, 120, 0.25); }
+    50%      { box-shadow: 0 0 0 2px rgba(200, 160, 71, 0.6), 0 6px 24px rgba(200, 160, 71, 0.45), 0 22px 60px rgba(154, 104, 120, 0.35); }
+  }
+  .result-card.perfect .result-verdict {
+    background: linear-gradient(135deg, #a03828, #c8a047);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: ikisugiShake 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes ikisugiShake {
+    0%   { transform: scale(0.5) rotate(-3deg); opacity: 0; }
+    40%  { transform: scale(1.18) rotate(2deg); opacity: 1; }
+    60%  { transform: scale(0.96) rotate(-1deg); }
+    80%  { transform: scale(1.04) rotate(1deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+  .result-card.perfect .result-emoji {
+    animation: emojiPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes emojiPop {
+    0%   { transform: scale(0); }
+    60%  { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+  .result-emoji { font-size: 56px; margin: 0 0 4px; line-height: 1; }
+  .result-verdict { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 4px; color: var(--yj-text); }
+  .result-sub { font-size: 14px; color: var(--yj-text-mid); margin: 0 0 14px; }
+  .score-ring { width: 130px; height: 130px; margin: 6px auto 12px; position: relative; }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring .score-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .score-num { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; font-variant-numeric: tabular-nums; color: var(--yj-text); }
+  .score-label { font-size: 11px; color: var(--yj-text-soft); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+  .breakdown { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .breakdown-item { background: var(--yj-bg2); border-radius: 12px; padding: 10px 6px; }
+  .breakdown-num { font-size: 18px; font-weight: 700; margin: 0; font-variant-numeric: tabular-nums; }
+  .breakdown-num.green { color: var(--yj-brown-deep); }
+  .breakdown-num.red { color: var(--yj-acid); }
+  .breakdown-num.orange { color: var(--yj-gold); }
+  .breakdown-label { font-size: 11px; color: var(--yj-text-mid); margin: 2px 0 0; }
+  .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .secondary-btn { background: var(--yj-surface); color: var(--yj-brown-deep); border: none; border-radius: 77px; padding: 16px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s, background 0.15s; box-shadow: 0 1px 2px rgba(77, 68, 82, 0.06), 0 4px 14px rgba(77, 68, 82, 0.09); }
+  .secondary-btn:hover { box-shadow: 0 2px 6px rgba(77, 68, 82, 0.10), 0 8px 22px rgba(77, 68, 82, 0.14); transform: translateY(-1px); }
+  .secondary-btn:active { transform: scale(0.97); background: var(--yj-bg2); }
+
+  /* Toast */
+  .toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(42, 32, 24, 0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: var(--yj-tan-light); padding: 11px 20px; border-radius: 100px; font-size: 14px; font-weight: 500; pointer-events: none; opacity: 0; transition: opacity 0.22s, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 100; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Streak flame */
+  .flame { display: inline-block; animation: wiggle 1.2s ease-in-out infinite; }
+  @keyframes wiggle { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+  /* Heart break */
+  @keyframes heartBreak { 0% { transform: scale(1); } 30% { transform: scale(1.3); } 100% { transform: scale(1); } }
+  .heart-break { animation: heartBreak 0.5s ease; }
+
+  /* Stats screen */
+  .stats-card { background: var(--yj-surface); border-radius: 18px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(77, 68, 82, 0.05), 0 4px 14px rgba(77, 68, 82, 0.08); }
+  .stats-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 0.5px solid var(--yj-border); font-size: 14px; color: var(--yj-text); }
+  .stats-row:last-child { border-bottom: none; }
+  .stats-row span:last-child { color: var(--yj-text-mid); font-variant-numeric: tabular-nums; }
+
+  /* Settings */
+  .settings-group { background: var(--yj-surface); border-radius: 18px; margin-bottom: 14px; overflow: hidden; box-shadow: 0 1px 2px rgba(77, 68, 82, 0.05), 0 4px 14px rgba(77, 68, 82, 0.08); }
+  .settings-item { display: flex; justify-content: space-between; align-items: center; padding: 13px 16px; border-bottom: 0.5px solid var(--yj-border); font-size: 15px; }
+  .settings-item:last-child { border-bottom: none; }
+  .settings-item .label { color: var(--yj-text); }
+  .settings-item .value { color: var(--yj-text-mid); font-size: 14px; }
+  .settings-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .settings-action { background: var(--yj-surface); color: var(--yj-brown-deep); border: none; border-radius: 77px; padding: 14px 16px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s; box-shadow: 0 1px 2px rgba(77, 68, 82, 0.06), 0 4px 14px rgba(77, 68, 82, 0.09); display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .settings-action:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(77, 68, 82, 0.10), 0 8px 22px rgba(77, 68, 82, 0.14); }
+  .settings-action:active { transform: scale(0.97); background: var(--yj-bg2); }
+  .settings-action.danger { color: var(--yj-acid); }
+  .file-hidden { display: none; }
+  .import-status { margin-top: 8px; font-size: 12px; padding: 8px 12px; border-radius: 8px; }
+  .import-status.ok { background: rgba(122, 100, 112, 0.12); color: var(--yj-brown-deep); }
+  .import-status.err { background: rgba(154, 104, 120, 0.12); color: var(--yj-acid); }
+
+  /* Narrow viewport adaptations */
+  @media (max-width: 380px) {
+    .dock { left: 8px; padding: 8px 6px; }
+    .dock-btn { width: 40px; height: 40px; }
+    .content-wrap { margin-left: 62px; }
+    .hero-title { font-size: 28px; }
+  }
+  /* Wide viewport: center content, dock floats over gradient */
+  @media (min-width: 720px) {
+    .dock { left: calc(50% - 320px); }
+  }
+  /* ===== Reset slider (iOS power-off style) ===== */
+  .reset-slider-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+    height: 64px;
+    margin: 8px auto 4px;
+    transition: opacity 0.5s cubic-bezier(.62,0,.4,1);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: pan-y;
+  }
+  .reset-slider-wrap.fade-out { opacity: 0; pointer-events: none; }
+  .reset-slider-track {
+    position: absolute;
+    inset: 0;
+    background: rgba(77, 68, 82, 0.35);
+    border-radius: 36px;
+    overflow: hidden;
+    box-shadow:
+      inset 1px -1px 11px rgba(255, 255, 255, 0.10),
+      inset 1px -1px 55px rgba(255, 255, 255, 0.08),
+      0 2px 18px rgba(77, 68, 82, 0.12);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .reset-slider-inner {
+    position: absolute;
+    top: 0; left: -5px;
+    height: 64px;
+    width: 72px;
+    border-radius: 36px;
+    background: linear-gradient(90deg, rgba(154, 104, 120, 0.45), rgba(122, 79, 92, 0.55));
+    transform: scale(0.9);
+    transition: width 0.13s;
+    pointer-events: none;
+  }
+  .reset-slider-label {
+    position: absolute;
+    left: 88px;
+    top: 0;
+    right: 16px;
+    height: 64px;
+    line-height: 64px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+    pointer-events: none;
+    user-select: none;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+  }
+  .reset-slider-knob {
+    position: absolute;
+    top: 4px; left: 4px;
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    border: none;
+    outline: none;
+    box-shadow:
+      1px -1px 1px rgba(255,255,255,0.6),
+      -1px 1px 1px rgba(255,255,255,0.6),
+      0 2px 12px rgba(0,0,0,0.12);
+    cursor: grab;
+    user-select: none;
+    transition:
+      background 0.4s cubic-bezier(.62,0,.4,1),
+      box-shadow 0.4s cubic-bezier(.62,0,.4,1),
+      left 0.5s cubic-bezier(.62,0,.4,1);
+  }
+  .reset-slider-knob:active { cursor: grabbing; background: rgba(235,235,235,0.85); }
+  .reset-arrow-poly {
+    transition: stroke 0.3s, stroke-width 0.3s, filter 0.3s;
+    stroke: var(--yj-acid);
+    stroke-width: 2.6;
+  }
+  .reset-slider-knob.active .reset-arrow-poly {
+    stroke: var(--yj-acid-dark);
+    stroke-width: 3.2;
+    filter: drop-shadow(0 0 7px rgba(154, 104, 120, 0.9));
+  }
+  .reset-helper {
+    font-size: 11px;
+    color: var(--yj-text-soft);
+    text-align: center;
+    margin: 0 0 12px;
+    line-height: 1.5;
+  }
+  /* Local dim overlay for settings (NOT global) */
+  .reset-dim {
+    position: absolute;
+    inset: 0;
+    background: #000;
+    opacity: 0;
+    pointer-events: none;
+    border-radius: 18px;
+    transition: opacity 0.5s cubic-bezier(.62,0,.4,1);
+    z-index: 0;
+  }
+  .reset-dim.active { opacity: 0.55; }
+  .reset-container { position: relative; padding: 4px; border-radius: 18px; }
+  .reset-container > * { position: relative; z-index: 1; }
+  /* ===== Preview item pop-in ===== */
+  .pv-item {
+    background: var(--yj-surface);
+    border-radius: 18px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 2px rgba(77, 68, 82, 0.06), 0 4px 14px rgba(77, 68, 82, 0.08);
+    opacity: 0;
+    transform: translateY(20px) scale(0.94);
+    animation: pvPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    transform-origin: center top;
+    will-change: transform, opacity;
+  }
+  @keyframes pvPop {
+    0%   { opacity: 0; transform: translateY(20px) scale(0.94); }
+    60%  { opacity: 1; transform: translateY(-3px) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .pv-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; gap: 8px; }
+  .pv-qn { font-size: 12px; color: var(--yj-text-soft); font-weight: 600; letter-spacing: 0.04em; }
+  .pv-ans { font-size: 12px; color: var(--yj-brown-deep); font-weight: 600; }
+  .pv-q { font-size: 14px; line-height: 1.5; margin: 0 0 10px; color: var(--yj-text); }
+  .pv-explain { font-size: 12px; color: var(--yj-text-mid); margin: 10px 0 0; line-height: 1.5; }
+
+  /* ===== Tutorial modal ===== */
+  .tutorial-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .tutorial-backdrop.show { opacity: 1; pointer-events: auto; }
+  .tutorial-card {
+    background: var(--yj-surface);
+    border-radius: 24px;
+    padding: 24px 22px;
+    max-width: 360px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), 0 4px 14px rgba(0, 0, 0, 0.12);
+    transform: scale(0.85) translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .tutorial-backdrop.show .tutorial-card { transform: scale(1) translateY(0); }
+  .tutorial-emoji { font-size: 44px; text-align: center; margin: 0 0 8px; line-height: 1; }
+  .tutorial-title { font-size: 22px; font-weight: 700; text-align: center; margin: 0 0 16px; color: var(--yj-text); letter-spacing: -0.01em; }
+  .tutorial-step { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
+  .tutorial-num { width: 28px; height: 28px; border-radius: 50%; background: var(--yj-brown); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .tutorial-text { font-size: 14px; line-height: 1.55; color: var(--yj-text); }
+  .tutorial-text b { color: var(--yj-acid); }
+  .tutorial-close { margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== Floating side dock ===== -->
+  <nav class="dock" role="navigation" aria-label="メイン">
+    <button class="dock-btn active" data-tab="home" aria-label="学ぶ">
+      <img src="./icons/pencil.tip.crop.circle.png" alt="" onload="console.debug('[BEAST] pencil.tip.crop.circle.png loaded')" onerror="console.warn('[BEAST] pencil.tip.crop.circle.png missing, falling back to emoji'); this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span class="icon-fallback" style="display:none">✏️</span>
+    </button>
+    <button class="dock-btn" data-tab="stats" aria-label="統計">
+      <img src="./icons/chart.pie.png" alt="" onload="console.debug('[BEAST] chart.pie.png loaded')" onerror="console.warn('[BEAST] chart.pie.png missing, falling back to emoji'); this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span class="icon-fallback" style="display:none">📊</span>
+    </button>
+    <button class="dock-btn" data-tab="settings" aria-label="設定">
+      <img src="./icons/gear.png" alt="" onload="console.debug('[BEAST] gear.png loaded')" onerror="console.warn('[BEAST] gear.png missing, falling back to emoji'); this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span class="icon-fallback" style="display:none">⚙️</span>
+    </button>
+  </nav>
+
+  <!-- ===== Content area ===== -->
+  <div class="content-wrap">
+
+    <!-- Top bar (only in quiz) -->
+    <header class="topbar" id="topbar">
+      <div class="topbar-row">
+        <h1 class="topbar-title" id="topbarTitle">セッション</h1>
+        <div class="topbar-stats">
+          <span class="stat-pill streak"><span class="flame">🔥</span><span id="streakNum">0</span></span>
+          <span class="stat-pill hearts" id="heartsPill">❤️ <span id="heartsNum">3</span></span>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+    </header>
+
+    <main class="main">
+
+      <!-- ===== Home ===== -->
+      <section class="screen active" id="screen-home">
+        <div class="hero">
+          <p class="hero-eyebrow">獣のように学ぶ</p>
+          <h2 class="hero-title">コーディングを<br><em>イキスギィ‼️</em></h2>
+          <p class="hero-sub">JS・JSON・React・Python・C・C++・C# / Unity を、淫夢の力で叩き込むクイズ。アクティビティリングを全部閉じよう。</p>
+        </div>
+
+        <!-- Activity rings -->
+        <div class="activity-card" id="activityCard">
+          <div class="ring-box">
+            <svg viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="50" stroke="rgba(154, 104, 120, 0.22)" stroke-width="10" fill="none"/>
+              <circle cx="60" cy="60" r="38" stroke="rgba(201, 188, 180, 0.28)" stroke-width="10" fill="none"/>
+              <circle cx="60" cy="60" r="26" stroke="rgba(157, 143, 111, 0.24)" stroke-width="10" fill="none"/>
+              <circle id="ringMove" class="ring-arc" cx="60" cy="60" r="50" stroke="#9a6878" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="314.16" stroke-dashoffset="314.16" style="transition: stroke-dashoffset 0.7s cubic-bezier(0.16, 1, 0.3, 1);"/>
+              <circle id="ringExer" class="ring-arc" cx="60" cy="60" r="38" stroke="#c9bcb4" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="238.76" stroke-dashoffset="238.76" style="transition: stroke-dashoffset 0.7s cubic-bezier(0.16, 1, 0.3, 1);"/>
+              <circle id="ringStand" class="ring-arc" cx="60" cy="60" r="26" stroke="#9d8f6f" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36" style="transition: stroke-dashoffset 0.7s cubic-bezier(0.16, 1, 0.3, 1);"/>
+            </svg>
+          </div>
+          <div class="ring-stats">
+            <div class="ring-stat ring-move">
+              <span class="ring-dot" style="background: #9a6878"></span>
+              <div>
+                <p class="ring-stat-label">獣力 (BEAST)</p>
+                <p class="ring-stat-val" id="moveVal">0<span>/15</span></p>
+              </div>
+            </div>
+            <div class="ring-stat ring-exer">
+              <span class="ring-dot" style="background: #c9bcb4"></span>
+              <div>
+                <p class="ring-stat-label">連続正解</p>
+                <p class="ring-stat-val" id="exerVal">0<span>/5</span></p>
+              </div>
+            </div>
+            <div class="ring-stat ring-stand">
+              <span class="ring-dot" style="background: #9d8f6f"></span>
+              <div>
+                <p class="ring-stat-label">挑戦日</p>
+                <p class="ring-stat-val" id="standVal">1<span>/7</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-h">レベルを選ぶ</h3>
+        <div class="level-grid" id="levelGrid"></div>
+
+        <h3 class="section-h">遊び方</h3>
+        <button class="level-card" id="howToBtn">
+          <div class="level-icon" style="background: linear-gradient(135deg, #9a6878, #6b5d6e);">📜</div>
+          <div class="level-body">
+            <p class="level-title">穴埋め式クイズ</p>
+            <p class="level-desc">タップして遊び方を見る</p>
+            <p class="level-meta">1 分で読める入門</p>
+          </div>
+          <span class="chev">›</span>
+        </button>
+      </section>
+
+      <!-- ===== Tutorial modal ===== -->
+      <div class="tutorial-backdrop" id="tutBack">
+        <div class="tutorial-card" id="tutCard">
+          <p class="tutorial-emoji">📜</p>
+          <h2 class="tutorial-title">穴埋め式クイズ</h2>
+          <div class="tutorial-step">
+            <span class="tutorial-num">1</span>
+            <span class="tutorial-text">レベルを選ぶ。コードのオレンジ色の<b>空欄</b>に入るものを 4 択から選ぶ。</span>
+          </div>
+          <div class="tutorial-step">
+            <span class="tutorial-num">2</span>
+            <span class="tutorial-text">正解で<b>獣力リング</b>が伸び、連続正解で<b>ストリーク</b>。間違えると<b>ハートが減る</b>（最大 3）。</span>
+          </div>
+          <div class="tutorial-step">
+            <span class="tutorial-num">3</span>
+            <span class="tutorial-text">ハート切れ＝<b>やりませんねぇ‼️</b>。間違えた問題は<b>結果画面から復習</b>できる。</span>
+          </div>
+          <div class="tutorial-step">
+            <span class="tutorial-num">4</span>
+            <span class="tutorial-text">選択肢は毎回<b>ランダム順</b>。正解の位置は固定じゃないから油断するな。</span>
+          </div>
+          <button class="next-btn tutorial-close" id="tutClose">理解した‼️</button>
+        </div>
+      </div>
+
+      <!-- ===== Quiz ===== -->
+      <section class="screen" id="screen-quiz">
+        <div class="quiz-meta">
+          <button class="quiz-back" id="quizBack">← もどる</button>
+          <span class="quiz-counter" id="quizCounter">1 / 5</span>
+        </div>
+        <div class="problem-card">
+          <span class="problem-tag" id="problemTag">JavaScript</span>
+          <p class="problem-text" id="problemText"></p>
+        </div>
+        <div class="code-block" id="codeBlock"></div>
+        <div class="choices" id="choicesEl"></div>
+        <div id="reactionArea"></div>
+      </section>
+
+      <!-- ===== Result ===== -->
+      <section class="screen" id="screen-result">
+        <div class="result-card">
+          <p class="result-emoji" id="resultEmoji">🎉</p>
+          <h2 class="result-verdict" id="resultVerdict">やりますねぇ‼️</h2>
+          <p class="result-sub" id="resultSub">セッション結果</p>
+          <div class="score-ring">
+            <svg width="130" height="130" viewBox="0 0 130 130">
+              <circle cx="65" cy="65" r="58" stroke="rgba(77, 68, 82, 0.12)" stroke-width="10" fill="none"/>
+              <circle id="resultRing" cx="65" cy="65" r="58" stroke="#8b6f47" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="364.4" stroke-dashoffset="364.4" style="transition: stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1);"/>
+            </svg>
+            <div class="score-text">
+              <span class="score-num" id="scoreNum">0%</span>
+              <span class="score-label">BEAST度</span>
+            </div>
+          </div>
+          <div class="breakdown">
+            <div class="breakdown-item">
+              <p class="breakdown-num green" id="bdCorrect">0</p>
+              <p class="breakdown-label">正解</p>
+            </div>
+            <div class="breakdown-item">
+              <p class="breakdown-num red" id="bdWrong">0</p>
+              <p class="breakdown-label">不正解</p>
+            </div>
+            <div class="breakdown-item">
+              <p class="breakdown-num orange" id="bdStreak">0</p>
+              <p class="breakdown-label">最大連続</p>
+            </div>
+          </div>
+        </div>
+        <div class="action-row">
+          <button class="secondary-btn" id="backHome">レベル選択</button>
+          <button class="next-btn" id="retry" style="margin-top: 0;">もう一度</button>
+        </div>
+        <button class="secondary-btn" id="practiceMistakes" style="width: 100%; margin-top: 8px; display: none; color: var(--yj-acid);">⚠️ 間違えた問題だけやり直す</button>
+      </section>
+
+      <!-- ===== Stats ===== -->
+      <section class="screen" id="screen-stats">
+        <div class="hero">
+          <p class="hero-eyebrow">学習データ</p>
+          <h2 class="hero-title">統計</h2>
+        </div>
+        <div class="stats-card">
+          <div class="stats-row"><span>累計正解数</span><span id="totalCorrect">0</span></div>
+          <div class="stats-row"><span>累計不正解数</span><span id="totalWrong">0</span></div>
+          <div class="stats-row"><span>正解率</span><span id="totalRate">—</span></div>
+          <div class="stats-row"><span>最長ストリーク</span><span id="totalMaxStreak">0</span></div>
+          <div class="stats-row"><span>完走セッション</span><span id="totalSessions">0</span></div>
+        </div>
+        <h3 class="section-h">アクティビティリング</h3>
+        <div class="stats-card">
+          <div class="stats-row"><span style="color:#9a6878">● 獣力 (BEAST)</span><span id="ringStatMove">0 / 15</span></div>
+          <div class="stats-row"><span style="color:#9d8f6f">● 連続正解</span><span id="ringStatExer">0 / 5</span></div>
+          <div class="stats-row"><span style="color:#8a8e80">● 挑戦日</span><span id="ringStatStand">1 / 7</span></div>
+        </div>
+      </section>
+
+      <!-- ===== Settings ===== -->
+      <section class="screen" id="screen-settings">
+        <div class="hero">
+          <p class="hero-eyebrow">アプリ設定</p>
+          <h2 class="hero-title">設定</h2>
+        </div>
+
+        <h3 class="section-h">問題プレビュー</h3>
+        <p style="font-size: 12px; color: var(--yj-text-soft); line-height: 1.55; margin: 0 4px 10px;">
+          各レベルを選んで、収録されている問題のコードと正解をチェックできる。
+        </p>
+        <div style="margin-bottom: 10px;">
+          <select id="previewSelect" style="width: 100%; padding: 14px 18px; border-radius: 77px; border: none; background: var(--yj-surface); color: var(--yj-text); font-size: 15px; font-weight: 500; font-family: inherit; cursor: pointer; box-shadow: 0 1px 2px rgba(77, 68, 82, 0.06), 0 4px 14px rgba(77, 68, 82, 0.09); appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22><path d=%22M1 1L6 6L11 1%22 stroke=%22%236b5d6e%22 stroke-width=%221.5%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>'); background-repeat: no-repeat; background-position: right 22px center; padding-right: 44px;"></select>
+        </div>
+        <div id="previewList"></div>
+
+        <h3 class="section-h">アプリ情報</h3>
+        <div class="settings-group">
+          <div class="settings-item"><span class="label">バージョン</span><span class="value">1.3.0</span></div>
+          <div class="settings-item"><span class="label">開発者</span><span class="value">S × Claude</span></div>
+          <div class="settings-item"><span class="label">問題数</span><span class="value" id="totalQs">—</span></div>
+          <div class="settings-item"><span class="label">カラーテーマ</span><span class="value">黄昏 (Dusk)</span></div>
+        </div>
+
+        <h3 class="section-h">データ</h3>
+        <div class="reset-container">
+          <div class="reset-dim" id="resetDim"></div>
+          <div class="reset-slider-wrap" id="resetWrap">
+            <div class="reset-slider-track">
+              <div class="reset-slider-inner" id="resetInner"></div>
+              <div class="reset-slider-label" id="resetLabel">スライドで全リセット</div>
+            </div>
+            <div class="reset-slider-knob" id="resetKnob">
+              <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
+                <polyline class="reset-arrow-poly" points="12,8 20,16 12,24" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <p class="reset-helper">統計・リング・進捗をすべて消します。元に戻せません。</p>
+        </div>
+
+        <h3 class="section-h">クレジット</h3>
+        <div class="stats-card" style="font-size: 13px; color: var(--yj-text-mid); line-height: 1.6;">
+          BEAST Learning は、淫夢ネタとコーディング学習を融合した実験的アプリです。<br><br>
+          すべての問題は教育目的で作成されています。獣のような学習体験をお楽しみください。
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ============ Asset diagnostics ============
+  function logBootInfo() {
+    console.info('[BEAST] v1.8.0 booted at', location.href);
+    const expectedAssets = [
+      './icons/pencil.tip.crop.circle.png',
+      './icons/chart.pie.png',
+      './icons/gear.png',
+      './sounds/outLevel.aif',
+      './sounds/Note_03_F4_Down_230811.wav',
+      './sounds/First_ear_complete-2.wav',
+      './sounds/cinema-studio-audio-1782347739500.wav',
+      './sounds/home-announcement-recording-begin.caf',
+      './sounds/announce-messages-tone-carplay.wav',
+      './sounds/EarInteraction_Complete.caf'
+    ];
+    expectedAssets.forEach(path => {
+      fetch(path, { method: 'HEAD' })
+        .then(r => {
+          if (r.ok) console.debug('[BEAST] ✓', path);
+          else console.warn('[BEAST] ✗ ' + r.status, path);
+        })
+        .catch(e => console.warn('[BEAST] ✗ fetch error', path, e.message));
+    });
+  }
+
+  // ============ Audio system ============
+  const SOUNDS = {
+    back:    './sounds/outLevel.aif',
+    tap:     './sounds/Note_03_F4_Down_230811.wav',
+    correct: './sounds/First_ear_complete-2.wav',
+    wrong:   './sounds/cinema-studio-audio-1782347739500.wav',
+    chime:   './sounds/home-announcement-recording-begin.caf',
+    result:  './sounds/announce-messages-tone-carplay.wav',
+    perfect: './sounds/EarInteraction_Complete.caf'
+  };
+  const audioPool = {};
+  function preloadAudio() {
+    Object.entries(SOUNDS).forEach(([key, src]) => {
+      try {
+        const a = new Audio(src);
+        a.preload = 'auto';
+        a.volume = 0.6;
+        a.addEventListener('error', () => {}, { once: true });
+        audioPool[key] = a;
+      } catch (e) {}
+    });
+  }
+  function playSound(key) {
+    const a = audioPool[key];
+    if (!a) return;
+    try {
+      const node = a.cloneNode();
+      node.volume = a.volume;
+      const p = node.play();
+      if (p && p.catch) p.catch(() => {});
+    } catch (e) {}
+  }
+  preloadAudio();
+
+  // ============ Haptic system (iOS) ============
+  let hapticMod = null;
+  const ua = navigator.userAgent;
+  const canHaptic = ('ontouchstart' in window || navigator.maxTouchPoints > 0) && /(iPhone|iPad|iPod|AppleWebKit)/i.test(ua);
+  if (canHaptic) {
+    import('https://esm.sh/ios-haptics')
+      .then(m => { hapticMod = m.haptic; })
+      .catch(() => {});
+  }
+  function hp(kind) {
+    if (!hapticMod) return;
+    try {
+      if (!kind) {
+        // single tap haptic
+        if (typeof hapticMod === 'function') hapticMod();
+        else if (hapticMod.selection) hapticMod.selection();
+      } else if (kind === 'confirm' && hapticMod.confirm) {
+        hapticMod.confirm();
+      } else if (kind === 'error' && hapticMod.error) {
+        hapticMod.error();
+      } else if (kind === 'selection' && hapticMod.selection) {
+        hapticMod.selection();
+      } else if (kind === 'impact' && hapticMod.impact) {
+        hapticMod.impact();
+      }
+    } catch (e) {}
+  }
+
+  // Unlock audio on first user interaction (iOS Safari requires gesture)
+  let audioUnlocked = false;
+  function unlockAudio() {
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+    Object.values(audioPool).forEach(a => {
+      try {
+        a.muted = true;
+        const p = a.play();
+        if (p && p.then) {
+          p.then(() => { a.pause(); a.currentTime = 0; a.muted = false; })
+           .catch(() => { a.muted = false; });
+        } else {
+          a.pause(); a.muted = false;
+        }
+      } catch(e) {}
+    });
+    document.removeEventListener('touchstart', unlockAudio);
+    document.removeEventListener('click', unlockAudio);
+  }
+  document.addEventListener('touchstart', unlockAudio, { once: false, passive: true });
+  document.addEventListener('click', unlockAudio, { once: false });
+
+  // ============ Question bank ============
+  const QUESTIONS = {
+    js_basic: {
+      title: 'JS入門', icon: '🦊', iconClass: 'js',
+      desc: '変数・ループ・条件分岐', meta: '5問・JavaScript',
+      tag: 'JavaScript', tagClass: 'js',
+      questions: [
+        { problem: '変数 <code>x</code> に <code>10</code> を代入する。空欄に入る記号は？',
+          code: '<span class="kw">let</span> x <span class="blank">?</span> <span class="num">10</span>;',
+          choices: ['=', '==', '===', ':='], answer: 0,
+          explain: '単一の <code>=</code> が代入。<code>==</code> や <code>===</code> は比較演算子。' },
+        { problem: '0 から 4 までを順に表示する。空欄の条件式は？',
+          code: '<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; <span class="blank">?</span>; i++) {\n  console.<span class="fn">log</span>(i);\n}',
+          choices: ['i < 5', 'i <= 5', 'i > 5', 'i = 5'], answer: 0,
+          explain: '<code>i < 5</code> なら i は 0,1,2,3,4 で 5 回ループ。<code><=</code> だと 5 まで含まれて 6 回。' },
+        { problem: '<code>score</code> が 60 以上のとき「合格」を表示する。空欄は？',
+          code: '<span class="kw">if</span> (<span class="blank">?</span>) {\n  console.<span class="fn">log</span>(<span class="str">"合格"</span>);\n}',
+          choices: ['score >= 60', 'score => 60', 'score = 60', 'score is 60'], answer: 0,
+          explain: '「以上」は <code>>=</code>。<code>=></code> はアロー関数の記号で意味が違う。' },
+        { problem: '配列の長さを取得するには？',
+          code: '<span class="kw">const</span> arr = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>];\n<span class="kw">const</span> n = <span class="blank">?</span>;',
+          choices: ['arr.length', 'arr.size()', 'len(arr)', 'arr.count'], answer: 0,
+          explain: 'JS の配列は <code>.length</code> プロパティ。関数呼び出しではないので <code>()</code> は付けない。' },
+        { problem: '関数の戻り値を返すキーワードは？',
+          code: '<span class="kw">function</span> <span class="fn">double</span>(n) {\n  <span class="blank">?</span> n * <span class="num">2</span>;\n}',
+          choices: ['return', 'yield', 'output', 'send'], answer: 0,
+          explain: '<code>return</code> で関数の値を返す。<code>yield</code> はジェネレータ専用。' }
+      ]
+    },
+    c_basic: {
+      title: 'C言語入門', icon: '⚙️', iconClass: 'c',
+      desc: '型・printf・ポインタ・配列', meta: '5問・C言語',
+      tag: 'C言語', tagClass: 'c',
+      questions: [
+        { problem: '整数型の変数 <code>n</code> を宣言して 0 で初期化する。空欄の型は？',
+          code: '<span class="blank">?</span> n = <span class="num">0</span>;',
+          choices: ['int', 'integer', 'number', 'var'], answer: 0,
+          explain: 'C の整数型は <code>int</code>。<code>integer</code> や <code>var</code> は他言語のキーワード。' },
+        { problem: '整数を 10 進数で表示するための書式指定子は？',
+          code: 'printf(<span class="str">"値は </span><span class="blank">?</span><span class="str">"</span>, n);',
+          choices: ['%d', '%s', '%f', '%c'], answer: 0,
+          explain: '<code>%d</code> が int 用。<code>%s</code> は文字列、<code>%f</code> は float、<code>%c</code> は単一文字。' },
+        { problem: '<code>p</code> が指す先の中身を取り出すには？',
+          code: '<span class="kw">int</span> x = <span class="num">7</span>;\n<span class="kw">int</span> *p = &amp;x;\n<span class="kw">int</span> y = <span class="blank">?</span>;',
+          choices: ['*p', '&p', 'p', '**p'], answer: 0,
+          explain: '<code>*p</code> で「p が指す先の中身」（参照外し）。<code>&p</code> は p 自身のアドレス。' },
+        { problem: '配列 <code>arr</code> の 3 番目の要素（値 30）にアクセスするには？',
+          code: '<span class="kw">int</span> arr[<span class="num">5</span>] = {<span class="num">10</span>,<span class="num">20</span>,<span class="num">30</span>,<span class="num">40</span>,<span class="num">50</span>};\n<span class="kw">int</span> x = <span class="blank">?</span>;',
+          choices: ['arr[2]', 'arr[3]', 'arr(3)', '*arr + 3'], answer: 0,
+          explain: '配列の添字は 0 始まり。3 番目は <code>arr[2]</code>。' },
+        { problem: '<code>malloc</code> で確保した領域を解放するには？',
+          code: '<span class="kw">int</span> *p = malloc(<span class="kw">sizeof</span>(<span class="kw">int</span>) * <span class="num">10</span>);\n<span class="com">// ...使い終わったら</span>\n<span class="blank">?</span>(p);',
+          choices: ['free', 'delete', 'release', 'destroy'], answer: 0,
+          explain: 'C では <code>free()</code>。<code>delete</code> は C++ の演算子。' }
+      ]
+    },
+    mixed_intermediate: {
+      title: 'BEAST中級', icon: '🔥', iconClass: 'mix',
+      desc: '関数・再帰・ポインタ演算・main の返り値', meta: '6問・JS+C 混合',
+      tag: 'MIX', tagClass: 'js',
+      questions: [
+        { problem: 'JS。再帰で階乗を書く。空欄は？',
+          code: '<span class="kw">function</span> <span class="fn">fact</span>(n) {\n  <span class="kw">if</span> (n <= <span class="num">1</span>) <span class="kw">return</span> <span class="num">1</span>;\n  <span class="kw">return</span> n * <span class="blank">?</span>;\n}',
+          choices: ['fact(n - 1)', 'fact(n)', 'n - 1', 'fact(n + 1)'], answer: 0,
+          explain: 'n × (n-1)! の定義通り。<code>fact(n)</code> だとベースケースに辿り着けず無限再帰。',
+          tag: 'JavaScript', tagClass: 'js' },
+        { problem: 'C。<code>main</code> 関数で正常終了を返す慣例は？',
+          code: '<span class="kw">int</span> <span class="fn">main</span>(<span class="kw">void</span>) {\n  printf(<span class="str">"hello"</span>);\n  <span class="kw">return</span> <span class="blank">?</span>;\n}',
+          choices: ['0', '1', 'true', 'NULL'], answer: 0,
+          explain: 'C/C++ では <code>main</code> は正常終了で <code>0</code> を返す。非ゼロはエラー。',
+          tag: 'C言語', tagClass: 'c' },
+        { problem: 'JS。配列の各要素を 2 倍にした新配列を作る。空欄は？',
+          code: '<span class="kw">const</span> doubled = [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>].<span class="blank">?</span>(x => x * <span class="num">2</span>);',
+          choices: ['map', 'forEach', 'filter', 'reduce'], answer: 0,
+          explain: '<code>map</code> は変換した新配列を返す。<code>forEach</code> は戻り値なし、<code>filter</code> は絞り込み。',
+          tag: 'JavaScript', tagClass: 'js' },
+        { problem: 'C。ポインタを 1 つ進めて次の要素を指す。空欄は？',
+          code: '<span class="kw">int</span> arr[<span class="num">3</span>] = {<span class="num">10</span>,<span class="num">20</span>,<span class="num">30</span>};\n<span class="kw">int</span> *p = arr;\np = <span class="blank">?</span>;\nprintf(<span class="str">"%d"</span>, *p); <span class="com">// 20</span>',
+          choices: ['p + 1', 'p + sizeof(int)', '*p + 1', '&p + 1'], answer: 0,
+          explain: 'ポインタ演算では <code>p + 1</code> が「次の要素のアドレス」。型サイズは自動考慮。',
+          tag: 'C言語', tagClass: 'c' },
+        { problem: 'JS。非同期処理を待つキーワードは？',
+          code: '<span class="kw">async</span> <span class="kw">function</span> <span class="fn">load</span>() {\n  <span class="kw">const</span> data = <span class="blank">?</span> fetch(<span class="str">"/api"</span>);\n}',
+          choices: ['await', 'wait', 'sync', 'promise'], answer: 0,
+          explain: '<code>await</code> は <code>async</code> 関数内で Promise の解決を待つ。',
+          tag: 'JavaScript', tagClass: 'js' },
+        { problem: 'C。文字列の長さを取得する標準関数は？',
+          code: '<span class="com">#include &lt;string.h&gt;</span>\n<span class="kw">char</span> s[] = <span class="str">"BEAST"</span>;\n<span class="kw">int</span> n = <span class="blank">?</span>(s); <span class="com">// 5</span>',
+          choices: ['strlen', 'length', 'sizeof', 'strsize'], answer: 0,
+          explain: '<code>strlen()</code> は終端 <code>\\0</code> までを数える。<code>sizeof</code> はバイト数。',
+          tag: 'C言語', tagClass: 'c' }
+      ]
+    },
+    json_fetch: {
+      title: 'JSON & fetch', icon: '📦', iconClass: 'js',
+      desc: 'パース・stringify・API・localStorage', meta: '6問・JavaScript',
+      tag: 'JSON', tagClass: 'js',
+      questions: [
+        { problem: 'JSON 文字列を JS オブジェクトに変換する。空欄は？',
+          code: '<span class="kw">const</span> str = <span class="str">\'{"name":"S","age":18}\'</span>;\n<span class="kw">const</span> obj = JSON.<span class="blank">?</span>(str);',
+          choices: ['parse', 'stringify', 'decode', 'fromString'], answer: 0,
+          explain: '<code>JSON.parse()</code> は文字列 → オブジェクト。<code>stringify</code> は逆方向。' },
+        { problem: 'オブジェクトを整形付き JSON 文字列にする。空欄は？',
+          code: '<span class="kw">const</span> data = { name: <span class="str">"S"</span> };\n<span class="kw">const</span> pretty = JSON.stringify(data, <span class="kw">null</span>, <span class="blank">?</span>);',
+          choices: ['2', '"pretty"', 'true', '"yes"'], answer: 0,
+          explain: '第3引数はインデントのスペース数。<code>2</code> で 2 スペース整形。' },
+        { problem: 'fetch で API を叩いて JSON を取得する。空欄は？',
+          code: '<span class="kw">const</span> res = <span class="kw">await</span> fetch(<span class="str">"/api/user"</span>);\n<span class="kw">const</span> data = <span class="kw">await</span> res.<span class="blank">?</span>();',
+          choices: ['json', 'parse', 'data', 'body'], answer: 0,
+          explain: '<code>res.json()</code> がレスポンスをパースする標準メソッド（Promise を返す）。' },
+        { problem: 'localStorage に JSON で保存する。空欄は？',
+          code: 'localStorage.setItem(<span class="str">"settings"</span>,\n  <span class="blank">?</span>({ theme: <span class="str">"dark"</span> })\n);',
+          choices: ['JSON.stringify', 'JSON.parse', 'String', 'toString'], answer: 0,
+          explain: 'localStorage は文字列しか保存できないので <code>JSON.stringify</code> でシリアライズする。' },
+        { problem: '次の JSON で構文エラーはどれ？',
+          code: '{\n  <span class="str">"name"</span>: <span class="str">"S"</span>,\n  <span class="str">"tags"</span>: [<span class="str">"a"</span>, <span class="str">"b"</span>, ],\n  <span class="str">"age"</span>: <span class="num">18</span>\n}',
+          choices: ['配列末尾の余分なカンマ', '日本語が含まれている', '改行が多い', 'エラーはない'], answer: 0,
+          explain: 'JSON は末尾カンマ禁止。<code>["a","b",]</code> は無効。JS では許されるが JSON ではダメ。' },
+        { problem: 'パース失敗を安全に処理する。空欄は？',
+          code: '<span class="kw">function</span> <span class="fn">safe</span>(s) {\n  <span class="kw">try</span> { <span class="kw">return</span> JSON.parse(s); }\n  <span class="blank">?</span> { <span class="kw">return</span> <span class="kw">null</span>; }\n}',
+          choices: ['catch', 'except', 'fail', 'else'], answer: 0,
+          explain: 'JS の例外処理は <code>try/catch</code>。Python は <code>except</code>。' }
+      ]
+    },
+    react_basics: {
+      title: 'React 入門', icon: '⚛️', iconClass: 'react',
+      desc: 'useState・JSX・イベント・effect', meta: '6問・React',
+      tag: 'React', tagClass: 'js',
+      questions: [
+        { problem: 'カウンタの state を作る。空欄は？',
+          code: '<span class="kw">const</span> [count, setCount] = <span class="blank">?</span>(<span class="num">0</span>);',
+          choices: ['useState', 'useRef', 'useEffect', 'useReducer'], answer: 0,
+          explain: '<code>useState</code> は state と setter のペアを返す Hook。' },
+        { problem: 'クリックでカウントを 1 増やす。空欄は？',
+          code: '&lt;button onClick={() => setCount(<span class="blank">?</span>)}&gt;\n  +1\n&lt;/button&gt;',
+          choices: ['count + 1', 'count++', '++count', 'count = count + 1'], answer: 0,
+          explain: 'React の state は不変。<code>count + 1</code> で新しい値を渡す。<code>count++</code> は副作用なので NG。' },
+        { problem: 'マウント時に 1 回だけ実行する。依存配列は？',
+          code: 'useEffect(() => {\n  console.log(<span class="str">"mounted"</span>);\n}, <span class="blank">?</span>);',
+          choices: ['[]', 'null', 'undefined', '[true]'], answer: 0,
+          explain: '空配列 <code>[]</code> なら依存がないので初回のみ実行。省略すると毎レンダリングで走る。' },
+        { problem: '配列をリスト描画するときの必須属性は？',
+          code: '{items.map(item =>\n  &lt;li <span class="blank">?</span>={item.id}&gt;{item.name}&lt;/li&gt;\n)}',
+          choices: ['key', 'id', 'index', 'ref'], answer: 0,
+          explain: 'React は <code>key</code> で要素の同一性を判定する。<code>index</code> は推奨されない。' },
+        { problem: '条件付きレンダリングのよくある書き方は？',
+          code: '{isLoggedIn <span class="blank">?</span> &lt;Dashboard /&gt;}',
+          choices: ['&&', '||', '!', '=='], answer: 0,
+          explain: '<code>{cond && JSX}</code> で条件が真のときだけ描画。短絡評価を使う定番。' },
+        { problem: '入力欄を制御コンポーネントにする。空欄は？',
+          code: '&lt;input value={text}\n  <span class="blank">?</span>={e => setText(e.target.value)}\n/&gt;',
+          choices: ['onChange', 'onInput', 'onUpdate', 'onType'], answer: 0,
+          explain: 'React では <code>onChange</code> が標準。素の HTML の onChange とは挙動が違い、毎キーで発火する。' }
+      ]
+    },
+    python_basics: {
+      title: 'Python 入門', icon: '🐍', iconClass: 'python',
+      desc: 'リスト・dict・with・FastAPI', meta: '6問・Python',
+      tag: 'Python', tagClass: 'c',
+      questions: [
+        { problem: 'リストの長さを取得するには？',
+          code: 'arr = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]\nn = <span class="blank">?</span>(arr)',
+          choices: ['len', 'length', 'size', 'count'], answer: 0,
+          explain: 'Python は組み込み関数 <code>len()</code>。JS の <code>.length</code> とは流儀が違う。' },
+        { problem: 'dict から安全にキーを取得する。空欄は？',
+          code: 'd = {<span class="str">"name"</span>: <span class="str">"S"</span>}\nv = d.<span class="blank">?</span>(<span class="str">"age"</span>, <span class="num">0</span>)',
+          choices: ['get', 'find', 'fetch', 'pop'], answer: 0,
+          explain: '<code>d.get(key, default)</code> はキーが無くてもエラーにならない。<code>d[key]</code> だと KeyError。' },
+        { problem: 'ファイルを安全に開く構文は？',
+          code: '<span class="blank">?</span> <span class="kw">open</span>(<span class="str">"data.txt"</span>) <span class="kw">as</span> f:\n    text = f.read()',
+          choices: ['with', 'use', 'try', 'open'], answer: 0,
+          explain: '<code>with</code> 文は自動でクローズしてくれる。リソース管理の定番。' },
+        { problem: 'リスト内包表記で偶数だけ取り出す。空欄は？',
+          code: 'evens = [n <span class="kw">for</span> n <span class="kw">in</span> arr <span class="blank">?</span>]',
+          choices: ['if n % 2 == 0', 'where n % 2 == 0', 'when n % 2', 'filter n % 2'], answer: 0,
+          explain: 'Python の内包表記は <code>[式 for 変数 in 反復 if 条件]</code> の形。' },
+        { problem: 'FastAPI で JSON を返すエンドポイント。空欄の戻り値は？',
+          code: '<span class="com">@app.get("/user")</span>\n<span class="kw">def</span> <span class="fn">get_user</span>():\n    <span class="kw">return</span> <span class="blank">?</span>',
+          choices: ['{"name": "S"}', 'JSON({"name":"S"})', 'render("S")', 'jsonify("S")'], answer: 0,
+          explain: 'FastAPI は dict をそのまま返すと自動で JSON にシリアライズする。Flask の <code>jsonify</code> は不要。' },
+        { problem: 'Anthropic SDK でモデル指定する引数名は？',
+          code: 'client.messages.create(\n    <span class="blank">?</span>=<span class="str">"claude-sonnet-4-6"</span>,\n    max_tokens=<span class="num">1024</span>,\n    messages=[...]\n)',
+          choices: ['model', 'name', 'engine', 'modelName'], answer: 0,
+          explain: 'Anthropic SDK は <code>model</code>。OpenAI 系も同じ命名。' }
+      ]
+    },
+    cpp_basics: {
+      title: 'C++ 入門', icon: '⚡', iconClass: 'cpp',
+      desc: 'std::vector・参照・スマートポインタ', meta: '6問・C++',
+      tag: 'C++', tagClass: 'c',
+      questions: [
+        { problem: '標準出力に文字列を流す。空欄は？',
+          code: '<span class="com">#include &lt;iostream&gt;</span>\n<span class="kw">int</span> main() {\n    std::cout <span class="blank">?</span> <span class="str">"hello"</span> &lt;&lt; std::endl;\n}',
+          choices: ['<<', '>>', '<-', '|>'], answer: 0,
+          explain: 'C++ のストリーム挿入演算子は <code>&lt;&lt;</code>。入力は <code>&gt;&gt;</code>。' },
+        { problem: '可変長配列として推奨されるコンテナは？',
+          code: '<span class="com">#include &lt;vector&gt;</span>\nstd::<span class="blank">?</span>&lt;<span class="kw">int</span>&gt; nums = {<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>};',
+          choices: ['vector', 'array', 'list', 'set'], answer: 0,
+          explain: '<code>std::vector</code> が事実上の標準。<code>std::array</code> は固定長。' },
+        { problem: '参照渡しで関数に渡す。空欄は？',
+          code: '<span class="kw">void</span> <span class="fn">incr</span>(<span class="kw">int</span><span class="blank">?</span> n) {\n    n++;\n}',
+          choices: ['&', '*', '&&', '@'], answer: 0,
+          explain: '<code>int& n</code> は参照。値ではなく元の変数を直接操作できる。<code>*</code> はポインタ。' },
+        { problem: 'モダン C++ で自動メモリ管理するスマートポインタは？',
+          code: '<span class="com">#include &lt;memory&gt;</span>\n<span class="kw">auto</span> p = std::<span class="blank">?</span>&lt;<span class="kw">int</span>&gt;(<span class="num">42</span>);',
+          choices: ['make_unique', 'make_pointer', 'new_unique', 'create'], answer: 0,
+          explain: '<code>std::make_unique&lt;T&gt;</code> は <code>std::unique_ptr</code> を安全に生成。<code>new</code> 直接使用は避ける。' },
+        { problem: '範囲 for 文で要素を走査する。空欄は？',
+          code: '<span class="kw">for</span> (<span class="kw">auto</span><span class="blank">?</span> n : nums) {\n    std::cout &lt;&lt; n;\n}',
+          choices: ['&', '*', '+', ''], answer: 0,
+          explain: '<code>auto&</code> で参照ループ。コピーを避けて高速。読み取りだけなら <code>const auto&</code> がベスト。' },
+        { problem: '名前空間 std を一行ずつ書きたくない時の宣言は？',
+          code: '<span class="kw">using</span> <span class="blank">?</span> std;\ncout &lt;&lt; <span class="str">"hi"</span>;',
+          choices: ['namespace', 'std::', 'import', 'include'], answer: 0,
+          explain: '<code>using namespace std;</code> でグローバルに展開できる。ヘッダで使うのは非推奨。' }
+      ]
+    },
+    csharp_unity: {
+      title: 'C# / Unity', icon: '🎮', iconClass: 'unity',
+      desc: 'PlayerMovement・Update・Vector3', meta: '7問・C# + Unity',
+      tag: 'C# / Unity', tagClass: 'c',
+      questions: [
+        { problem: 'C#。Unity の MonoBehaviour で毎フレーム呼ばれるメソッドは？',
+          code: '<span class="kw">public class</span> Player : MonoBehaviour {\n    <span class="kw">void</span> <span class="blank">?</span>() {\n        <span class="com">// 毎フレーム実行</span>\n    }\n}',
+          choices: ['Update', 'Start', 'Awake', 'OnTick'], answer: 0,
+          explain: '<code>Update()</code> が毎フレーム。<code>Start()</code> は初回のみ、<code>FixedUpdate()</code> は物理更新タイミング。',
+          tag: 'Unity', tagClass: 'c' },
+        { problem: 'Unity。WASD 入力で水平方向の値を取る。空欄は？',
+          code: '<span class="kw">float</span> h = Input.<span class="blank">?</span>(<span class="str">"Horizontal"</span>);',
+          choices: ['GetAxis', 'GetKey', 'GetButton', 'GetInput'], answer: 0,
+          explain: '<code>GetAxis</code> は -1〜1 の滑らかな値を返す。<code>GetKey</code> はキー単位の bool。',
+          tag: 'Unity', tagClass: 'c' },
+        { problem: 'Unity。Rigidbody に速度を与える。空欄は？',
+          code: 'Rigidbody rb;\nrb.<span class="blank">?</span> = <span class="kw">new</span> Vector3(speed, <span class="num">0</span>, <span class="num">0</span>);',
+          choices: ['velocity', 'speed', 'force', 'move'], answer: 0,
+          explain: '<code>velocity</code> で直接速度を設定。<code>AddForce</code> は力を加える（加速度的）。',
+          tag: 'Unity', tagClass: 'c' },
+        { problem: 'Unity。フレームレート非依存にするための係数は？',
+          code: 'transform.position += dir * speed * Time.<span class="blank">?</span>;',
+          choices: ['deltaTime', 'time', 'fps', 'frame'], answer: 0,
+          explain: '<code>Time.deltaTime</code> は前フレームからの秒数。これを掛けるとフレームレートに依存しない動きになる。',
+          tag: 'Unity', tagClass: 'c' },
+        { problem: 'C#。プロパティの自動実装。空欄は？',
+          code: '<span class="kw">public string</span> Name { <span class="blank">?</span>; <span class="kw">set</span>; }',
+          choices: ['get', 'read', 'fetch', 'val'], answer: 0,
+          explain: 'C# の自動プロパティは <code>{ get; set; }</code>。getter/setter を簡潔に書ける。',
+          tag: 'C#', tagClass: 'c' },
+        { problem: 'C#。null 安全な呼び出し演算子は？',
+          code: '<span class="kw">string</span> name = user<span class="blank">?</span>.Name;',
+          choices: ['?', '!', '*', '&'], answer: 0,
+          explain: 'null 条件演算子 <code>?.</code> は user が null なら全体を null にする。NullReferenceException を防ぐ。',
+          tag: 'C#', tagClass: 'c' },
+        { problem: 'Unity。ジャンプ判定で地面接触を調べる代表的なメソッドは？',
+          code: '<span class="kw">bool</span> grounded = Physics.<span class="blank">?</span>(\n    transform.position,\n    Vector3.down,\n    <span class="num">0.1f</span>\n);',
+          choices: ['Raycast', 'Spherecast', 'Overlap', 'Detect'], answer: 0,
+          explain: '<code>Physics.Raycast</code> は指定方向に光線を飛ばして衝突を検知。地面判定の定番。',
+          tag: 'Unity', tagClass: 'c' }
+      ]
+    },
+    html_basics: {
+      title: 'HTML 入門', icon: '🌐', iconClass: 'js',
+      desc: 'タグ・属性・セマンティクス', meta: '6問・HTML',
+      tag: 'HTML', tagClass: 'js',
+      questions: [
+        { problem: 'リンクを作るタグは？',
+          code: '<span class="kw">&lt;</span><span class="blank">?</span> href=<span class="str">"https://example.com"</span><span class="kw">&gt;</span>クリック<span class="kw">&lt;/</span><span class="blank">?</span><span class="kw">&gt;</span>',
+          choices: ['a', 'link', 'href', 'url'], answer: 0,
+          explain: '<code>&lt;a&gt;</code>（anchor）がリンク。<code>&lt;link&gt;</code> は CSS 読み込み用で意味が違う。' },
+        { problem: '画像を表示するタグは？',
+          code: '<span class="kw">&lt;</span><span class="blank">?</span> src=<span class="str">"cat.jpg"</span> alt=<span class="str">"猫"</span> /<span class="kw">&gt;</span>',
+          choices: ['img', 'image', 'picture', 'src'], answer: 0,
+          explain: '<code>&lt;img&gt;</code> は自己閉じタグ。alt 属性はアクセシビリティと SEO の両面で必須。' },
+        { problem: '入力欄をメール形式に制限する属性値は？',
+          code: '<span class="kw">&lt;</span>input type=<span class="str">"</span><span class="blank">?</span><span class="str">"</span> placeholder=<span class="str">"@gmail.com"</span> /<span class="kw">&gt;</span>',
+          choices: ['email', 'mail', 'address', 'string'], answer: 0,
+          explain: '<code>type="email"</code> はモバイルでメール用キーボードを表示、自動バリデーションも走る。' },
+        { problem: 'ページの主要コンテンツを意味する HTML5 セマンティック要素は？',
+          code: '<span class="kw">&lt;</span><span class="blank">?</span><span class="kw">&gt;</span>\n  <span class="kw">&lt;</span>h1<span class="kw">&gt;</span>記事タイトル<span class="kw">&lt;/</span>h1<span class="kw">&gt;</span>\n<span class="kw">&lt;/</span><span class="blank">?</span><span class="kw">&gt;</span>',
+          choices: ['main', 'body', 'content', 'article'], answer: 0,
+          explain: '<code>&lt;main&gt;</code> はページの主要コンテンツ領域、1ページに1つだけ。<code>&lt;article&gt;</code> は独立した記事単位。' },
+        { problem: 'スマホでビューポート（表示倍率）を制御する meta タグの内容は？',
+          code: '<span class="kw">&lt;</span>meta name=<span class="str">"viewport"</span>\n  content=<span class="str">"</span><span class="blank">?</span>, initial-scale=1<span class="str">"</span> /<span class="kw">&gt;</span>',
+          choices: ['width=device-width', 'fullscreen=yes', 'mobile=true', 'size=auto'], answer: 0,
+          explain: '<code>width=device-width</code> でデバイスの幅に合わせる。これがないと PC レイアウトが縮小表示されてしまう。' },
+        { problem: 'スクリプトを HTML 解析後に実行する属性は？',
+          code: '<span class="kw">&lt;</span>script src=<span class="str">"app.js"</span> <span class="blank">?</span><span class="kw">&gt;&lt;/</span>script<span class="kw">&gt;</span>',
+          choices: ['defer', 'async', 'lazy', 'wait'], answer: 0,
+          explain: '<code>defer</code> は HTML 解析後に順序通りで実行。<code>async</code> はダウンロード完了次第すぐ実行で順序保証なし。' }
+      ]
+    },
+    python_advanced: {
+      title: 'Python 応用', icon: '🐍', iconClass: 'python',
+      desc: 'デコレータ・型ヒント・asyncio', meta: '6問・Python',
+      tag: 'Python', tagClass: 'c',
+      questions: [
+        { problem: 'デコレータを定義する記号は？',
+          code: '<span class="blank">?</span>app.get(<span class="str">"/"</span>)\n<span class="kw">def</span> <span class="fn">root</span>():\n    <span class="kw">return</span> {<span class="str">"hello"</span>: <span class="str">"world"</span>}',
+          choices: ['@', '#', '$', '&'], answer: 0,
+          explain: '<code>@decorator</code> でデコレータを適用。<code>#</code> はコメント。' },
+        { problem: '型ヒントで「文字列を返す」を表すには？',
+          code: '<span class="kw">def</span> <span class="fn">greet</span>(name: <span class="kw">str</span>) <span class="blank">?</span> <span class="kw">str</span>:\n    <span class="kw">return</span> <span class="str">f"Hello {name}"</span>',
+          choices: ['->', ':', '=>', 'returns'], answer: 0,
+          explain: '<code>def f() -> str:</code> の <code>-&gt;</code> は戻り値型注釈。' },
+        { problem: 'async 関数で非同期処理を待つキーワードは？',
+          code: '<span class="kw">async def</span> <span class="fn">main</span>():\n    data = <span class="blank">?</span> fetch_data()',
+          choices: ['await', 'wait', 'yield', 'sync'], answer: 0,
+          explain: 'Python の <code>await</code> は <code>async def</code> 関数内で coroutine を待つ。JS と同じ命名。' },
+        { problem: '辞書 d のすべてのキーをループで取り出す。空欄は？',
+          code: '<span class="kw">for</span> k <span class="kw">in</span> d.<span class="blank">?</span>():\n    print(k)',
+          choices: ['keys', 'all', 'list', 'each'], answer: 0,
+          explain: '<code>d.keys()</code>。なお実は <code>for k in d:</code> だけでもキーが取れるが、明示の方が読みやすい。' },
+        { problem: 'リスト推内包でゼロ除算を回避する条件式（三項）の構文は？',
+          code: 'safe = [<span class="num">100</span>/x <span class="kw">if</span> x <span class="blank">?</span> <span class="kw">else</span> <span class="num">0</span> <span class="kw">for</span> x <span class="kw">in</span> nums]',
+          choices: ['!= 0', 'not 0', '<> 0', 'is not 0'], answer: 0,
+          explain: 'Python の不等価演算子は <code>!=</code>。<code>&lt;&gt;</code> は Python 2 で削除済み、<code>is not</code> は同一性比較で 0 には使うべきでない。' },
+        { problem: 'コンテキストマネージャを定義するデコレータは？',
+          code: '<span class="kw">from</span> contextlib <span class="kw">import</span> contextmanager\n\n<span class="blank">?</span>\n<span class="kw">def</span> <span class="fn">timer</span>():\n    <span class="kw">yield</span>',
+          choices: ['@contextmanager', '@with', '@async', '@context'], answer: 0,
+          explain: '<code>@contextmanager</code> で <code>yield</code> ベースの簡易 context manager になり、with 文で使える。' }
+      ]
+    }
+  };
+
+  // ============ Reactions ============
+  const CORRECT_REACTIONS = [
+    { emoji: '🔥', big: 'やりますねぇ‼️', sub: '当然の正解。獣の本能を感じる。' },
+    { emoji: '💢', big: 'イキスギィ‼️', sub: '(≧Д≦)ンァーッ！見事。' },
+    { emoji: '😤', big: 'KMR⁉️', sub: '美味しいカぁ⁉️ 正解の味、堪能しましたか。' },
+    { emoji: '💥', big: '"デデドン"', sub: '（完璧）迫真の正解。' },
+    { emoji: '🚀', big: '行きますねぇ‼️', sub: '次もそうやって解いてくれよな〜頼むよ〜' },
+    { emoji: '🦁', big: 'BEAST‼️', sub: '獣のようにやりますねぇ‼️' },
+    { emoji: '🎯', big: 'お、そうだな', sub: '（今回は正解の意味で）' },
+    { emoji: '🍆', big: 'ブッフォwwww', sub: '正解しすぎてキレてんだ察しろ' },
+    { emoji: '⚡', big: 'TDN', sub: '田所、正解動画…？' },
+    { emoji: '🌈', big: 'ファッ⁉️', sub: '正解した瞬間にお漏らしも仕方ないね' },
+    { emoji: '🐗', big: '24歳学生です', sub: '正解動画は流出していない（迫真）' },
+    { emoji: '💪', big: 'んあぁぁぁぁ‼️', sub: 'いいよ！こいよ！' },
+    { emoji: '🥩', big: '美味そう', sub: '正解の味、堪能しましたか' },
+    { emoji: '🎓', big: '頭脳明晰', sub: 'お、そうだな（褒め）' },
+    { emoji: '😎', big: '余裕ですわ', sub: 'こんな問題、朝飯前ね' }
+  ];
+  const WRONG_REACTIONS = [
+    { emoji: '👀', big: '嘘つけ絶対みてたゾ', sub: 'カンニングの可能性が微レ存…？' },
+    { emoji: '🤔', big: 'お、そうだな', sub: 'なんで見る必要なんかあるんですか。' },
+    { emoji: '🐶', big: 'クゥーン…', sub: 'みろよみろよ‼️ 嬉しいだロォォ⁉️ じゃないんだよなぁ' },
+    { emoji: '🙅', big: '便乗するな', sub: 'もう一度よく見ろください…' },
+    { emoji: '💀', big: '"デデドン"', sub: '（不正解）' },
+    { emoji: '😱', big: 'は？', sub: '迫真のミス。落ち着いてもう一度。' },
+    { emoji: '🚫', big: '初めてだからわからない', sub: 'いや何回目だよ' },
+    { emoji: '🥵', big: 'ファッ⁉️', sub: 'ふぅんいいよ…来いよ…（解説を見ろ）' },
+    { emoji: '🔇', big: 'は？じゃあいいわ', sub: 'もう一度頼むよ〜' },
+    { emoji: '😵', big: 'TDN不正解', sub: '田所…なぜ間違えた…？' },
+    { emoji: '🚪', big: '帰れ', sub: '出直してこいください' },
+    { emoji: '🥶', big: '何しとんねん', sub: 'もうええわ。次行こう次' },
+    { emoji: '🫠', big: 'は ⁇', sub: '今キレた' }
+  ];
+
+  // ============ Persisted state ============
+  const STORAGE_KEY = 'beast_learning_v1';
+  const today = () => new Date().toDateString();
+  function loadStats() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch(e) {}
+    return {
+      totalCorrect: 0, totalWrong: 0, maxStreakEver: 0, sessionsDone: 0,
+      ringMove: 0,     // correct answers toward daily goal
+      ringExer: 0,     // current best streak today
+      ringStand: 1,    // days active in last 7 (start at 1 for today)
+      lastDay: today(),
+      activeDays: [today()]
+    };
+  }
+  function saveStats() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stats)); } catch(e) {}
+  }
+  const stats = loadStats();
+  // Day rollover: if last visit was a different day, increment stand
+  if (stats.lastDay !== today()) {
+    stats.ringMove = 0;
+    stats.ringExer = 0;
+    stats.lastDay = today();
+    if (!stats.activeDays.includes(today())) {
+      stats.activeDays.push(today());
+      if (stats.activeDays.length > 7) stats.activeDays = stats.activeDays.slice(-7);
+    }
+    stats.ringStand = stats.activeDays.length;
+    saveStats();
+  }
+
+  // ============ Session state ============
+  const session = {
+    levelKey: null, qi: 0, correct: 0, wrong: 0,
+    streak: 0, maxStreak: 0, hearts: 3, locked: false,
+    mistakeIndices: [],     // 今回のセッションで間違えた問題の元 index
+    practiceMode: false,    // 復習モード中フラグ
+    practiceQuestions: null // 復習問題リスト（指定があれば level.questions より優先）
+  };
+
+  // ============ Helpers ============
+  const $ = id => document.getElementById(id);
+  const showToast = msg => {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => t.classList.remove('show'), 1400);
+  };
+  function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    $(id).classList.add('active');
+    $('topbar').classList.toggle('show', id === 'screen-quiz');
+  }
+
+  // ============ Activity Rings ============
+  const RING_GOALS = { move: 15, exer: 5, stand: 7 };
+  // Circumferences: 2πr for r=50, 38, 26
+  const RING_CIRC = { move: 2*Math.PI*50, exer: 2*Math.PI*38, stand: 2*Math.PI*26 };
+
+  function updateRings(flashColor = null) {
+    const moveProg = Math.min(stats.ringMove / RING_GOALS.move, 1);
+    const exerProg = Math.min(stats.ringExer / RING_GOALS.exer, 1);
+    const standProg = Math.min(stats.ringStand / RING_GOALS.stand, 1);
+    $('ringMove').style.strokeDashoffset = RING_CIRC.move * (1 - moveProg);
+    $('ringExer').style.strokeDashoffset = RING_CIRC.exer * (1 - exerProg);
+    $('ringStand').style.strokeDashoffset = RING_CIRC.stand * (1 - standProg);
+    $('moveVal').innerHTML = `${stats.ringMove}<span>/${RING_GOALS.move}</span>`;
+    $('exerVal').innerHTML = `${stats.ringExer}<span>/${RING_GOALS.exer}</span>`;
+    $('standVal').innerHTML = `${stats.ringStand}<span>/${RING_GOALS.stand}</span>`;
+    // Stats screen
+    $('ringStatMove').textContent = `${stats.ringMove} / ${RING_GOALS.move}`;
+    $('ringStatExer').textContent = `${stats.ringExer} / ${RING_GOALS.exer}`;
+    $('ringStatStand').textContent = `${stats.ringStand} / ${RING_GOALS.stand}`;
+    if (flashColor) {
+      const el = $('ring' + flashColor);
+      if (el) {
+        el.classList.add('flash');
+        setTimeout(() => el.classList.remove('flash'), 600);
+      }
+    }
+  }
+  function updateStatsScreen() {
+    $('totalCorrect').textContent = stats.totalCorrect;
+    $('totalWrong').textContent = stats.totalWrong;
+    const total = stats.totalCorrect + stats.totalWrong;
+    $('totalRate').textContent = total === 0 ? '—' : Math.round(stats.totalCorrect / total * 100) + '%';
+    $('totalMaxStreak').textContent = stats.maxStreakEver;
+    $('totalSessions').textContent = stats.sessionsDone;
+    // Total questions
+    const tot = Object.values(QUESTIONS).reduce((s, l) => s + l.questions.length, 0);
+    $('totalQs').textContent = tot;
+  }
+
+  // ============ Home ============
+  const CATEGORIES = [
+    { title: '基礎', keys: ['js_basic', 'c_basic', 'json_fetch'] },
+    { title: 'Web / フレームワーク', keys: ['html_basics', 'react_basics', 'python_basics', 'python_advanced'] },
+    { title: '低レイヤ / ゲーム', keys: ['cpp_basics', 'csharp_unity'] },
+    { title: '腕試し', keys: ['mixed_intermediate'] }
+  ];
+  function renderHome() {
+    const grid = $('levelGrid');
+    grid.innerHTML = '';
+    CATEGORIES.forEach(cat => {
+      const catLabel = document.createElement('p');
+      catLabel.style.cssText = 'font-size: 12px; font-weight: 600; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.06em; margin: 12px 4px 6px; padding: 0;';
+      catLabel.textContent = cat.title;
+      grid.appendChild(catLabel);
+      cat.keys.forEach(key => {
+        const level = QUESTIONS[key];
+        if (!level) return;
+        const btn = document.createElement('button');
+        btn.className = 'level-card';
+        btn.innerHTML = `
+          <div class="level-icon ${level.iconClass}">${level.icon}</div>
+          <div class="level-body">
+            <p class="level-title">${level.title}</p>
+            <p class="level-desc">${level.desc}</p>
+            <p class="level-meta">${level.meta}</p>
+          </div>
+          <span class="chev">›</span>
+        `;
+        btn.addEventListener('click', () => { playSound('tap'); hp(); startLevel(key); });
+        grid.appendChild(btn);
+      });
+    });
+  }
+
+  // ============ Quiz ============
+  function startLevel(key, opts) {
+    opts = opts || {};
+    session.levelKey = key;
+    session.qi = 0;
+    session.correct = 0;
+    session.wrong = 0;
+    session.streak = 0;
+    session.maxStreak = 0;
+    session.hearts = 3;
+    session.locked = false;
+    session.mistakeIndices = []; // indices into the level's question array that were wrong
+    session.practiceQuestions = null; // override question list when retrying mistakes
+
+    if (opts.practiceQuestions && Array.isArray(opts.practiceQuestions) && opts.practiceQuestions.length > 0) {
+      session.practiceQuestions = opts.practiceQuestions;
+      session.practiceMode = true;
+      $('topbarTitle').textContent = QUESTIONS[key].title + ' · 復習';
+    } else {
+      session.practiceMode = false;
+      $('topbarTitle').textContent = QUESTIONS[key].title;
+    }
+    // Hard reset DOM
+    $('reactionArea').innerHTML = '';
+    $('choicesEl').innerHTML = '';
+    showScreen('screen-quiz');
+    renderQuestion();
+    updateTopbar();
+  }
+  // Return the active question array for current session (full level or mistake subset)
+  function activeQuestions() {
+    if (session.practiceQuestions) return session.practiceQuestions;
+    return QUESTIONS[session.levelKey].questions;
+  }
+  function updateTopbar() {
+    $('streakNum').textContent = session.streak;
+    $('heartsNum').textContent = session.hearts;
+    const total = activeQuestions().length;
+    $('progFill').style.width = `${(session.qi / total) * 100}%`;
+  }
+  // Fisher-Yates shuffle returning new array
+  function shuffleArr(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function renderQuestion() {
+    const level = QUESTIONS[session.levelKey];
+    const qList = activeQuestions();
+    const q = qList[session.qi];
+    session.locked = false;
+    $('quizCounter').textContent = `${session.qi + 1} / ${qList.length}`;
+    const tagText = q.tag || level.tag;
+    const tagClass = q.tagClass || level.tagClass;
+    const tagEl = $('problemTag');
+    tagEl.textContent = tagText;
+    tagEl.className = `problem-tag ${tagClass}`;
+    $('problemText').innerHTML = q.problem;
+    $('codeBlock').innerHTML = q.code;
+    // Build shuffled order [originalIndex, ...] then re-derive answer index
+    const order = shuffleArr(q.choices.map((_, i) => i));
+    session.currentOrder = order;
+    session.currentAnswerIdx = order.indexOf(q.answer);
+    const shuffledChoices = order.map(i => q.choices[i]);
+    const choicesEl = $('choicesEl');
+    choicesEl.innerHTML = '';
+    const letters = ['A', 'B', 'C', 'D'];
+    shuffledChoices.forEach((c, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'choice';
+      btn.innerHTML = `<span class="choice-letter">${letters[i]}</span><code>${escapeHtml(c)}</code>`;
+      btn.addEventListener('click', () => handlePick(i, btn));
+      choicesEl.appendChild(btn);
+    });
+    $('reactionArea').innerHTML = '';
+    updateTopbar();
+  }
+  function handlePick(idx, btn) {
+    if (session.locked) return;
+    session.locked = true;
+    const level = QUESTIONS[session.levelKey];
+    const qList = activeQuestions();
+    const q = qList[session.qi];
+    const isRight = idx === session.currentAnswerIdx;
+    const allChoices = $('choicesEl').querySelectorAll('.choice');
+    allChoices.forEach(b => b.classList.add('disabled'));
+
+    if (isRight) {
+      btn.classList.add('correct');
+      playSound('correct');
+      hp('confirm');
+      session.correct++;
+      session.streak++;
+      session.maxStreak = Math.max(session.maxStreak, session.streak);
+
+      // ストリーク強化 haptic（連続正解で派手に）
+      if (session.streak === 3) {
+        setTimeout(() => hp('confirm'), 180);
+      } else if (session.streak === 5) {
+        for (let i = 0; i < 3; i++) setTimeout(() => hp('confirm'), 180 + i * 100);
+      } else if (session.streak === 7) {
+        for (let i = 0; i < 4; i++) setTimeout(() => hp('confirm'), 180 + i * 80);
+      } else if (session.streak >= 10 && session.streak % 5 === 0) {
+        // 10連、15連…のマイルストン
+        for (let i = 0; i < 5; i++) setTimeout(() => hp('confirm'), 150 + i * 70);
+      }
+
+      stats.totalCorrect++;
+      stats.maxStreakEver = Math.max(stats.maxStreakEver, session.maxStreak);
+      stats.ringMove = Math.min(stats.ringMove + 1, RING_GOALS.move);
+      stats.ringExer = Math.max(stats.ringExer, session.streak);
+      saveStats();
+
+      const r = CORRECT_REACTIONS[Math.floor(Math.random() * CORRECT_REACTIONS.length)];
+      $('reactionArea').innerHTML = `
+        <div class="di-region">
+          <div class="di-pill">
+            <span class="di-emoji">${r.emoji}</span>
+            <div class="di-text">
+              <span class="di-big r-correct">${r.big}</span>
+              <span class="di-sub">${r.sub}</span>
+            </div>
+            <span class="di-dot r-correct"></span>
+          </div>
+          <div class="di-explain">${q.explain}</div>
+        </div>
+        <button class="next-btn" id="nextBtn">${session.qi < qList.length - 1 ? '次の問題 →' : '結果を見る →'}</button>
+      `;
+      showToast('正解');
+      updateRings('Move');
+      setTimeout(() => updateRings('Exer'), 200);
+    } else {
+      btn.classList.add('wrong');
+      playSound('wrong');
+      hp('error');
+      const correctBtn = allChoices[session.currentAnswerIdx];
+      correctBtn.classList.remove('disabled');
+      correctBtn.classList.add('correct');
+      session.wrong++;
+      session.streak = 0;
+      session.hearts--;
+      stats.totalWrong++;
+      saveStats();
+
+      // Track mistake (store the actual question object so practice mode works for either source)
+      if (!session.mistakeIndices.some(m => m.problem === q.problem)) {
+        session.mistakeIndices.push(q);
+      }
+
+      const heartEl = $('heartsPill');
+      heartEl.classList.add('heart-break');
+      setTimeout(() => heartEl.classList.remove('heart-break'), 500);
+
+      // 不正解の haptic — 通常3連、ゲームオーバーで5連バースト＋遅延 error
+      if (session.hearts <= 0) {
+        // やりませんねぇバースト
+        for (let i = 0; i < 5; i++) setTimeout(() => hp('error'), 120 + i * 90);
+        setTimeout(() => hp('impact'), 700);
+      } else {
+        setTimeout(() => hp('error'), 120);
+        setTimeout(() => hp(), 280);
+      }
+
+      const r = WRONG_REACTIONS[Math.floor(Math.random() * WRONG_REACTIONS.length)];
+      const gameOver = session.hearts <= 0;
+      $('reactionArea').innerHTML = `
+        <div class="di-region">
+          <div class="di-pill">
+            <span class="di-emoji">${r.emoji}</span>
+            <div class="di-text">
+              <span class="di-big r-wrong">${r.big}</span>
+              <span class="di-sub">${r.sub}</span>
+            </div>
+            <span class="di-dot r-wrong"></span>
+          </div>
+          <div class="di-explain">正解は <code>${escapeHtml(q.choices[q.answer])}</code> — ${q.explain}</div>
+        </div>
+        <button class="next-btn ${gameOver ? 'danger' : ''}" id="nextBtn">${gameOver ? 'やりませんねぇ‼️ — 結果へ' : (session.qi < qList.length - 1 ? '次の問題 →' : '結果を見る →')}</button>
+      `;
+      showToast(gameOver ? 'やりませんねぇ‼️' : '不正解');
+      updateRings();
+    }
+    $('nextBtn').addEventListener('click', () => {
+      playSound('tap');
+      hp();
+      if (session.hearts <= 0) {
+        showResult(true);
+        return;
+      }
+      if (session.qi < qList.length - 1) {
+        session.qi++;
+        renderQuestion();
+      } else {
+        showResult(false);
+      }
+    });
+    updateTopbar();
+  }
+
+  // ============ Result ============
+  function showResult(gameOver) {
+    stats.sessionsDone++;
+    saveStats();
+    showScreen('screen-result');
+    const total = activeQuestions().length;
+    const pct = Math.round((session.correct / total) * 100);
+
+    // ===== Result audio: 満点 = perfect (EarInteraction_Complete.caf)、それ以外 = result (announce-messages-tone-carplay.wav) =====
+    const isPerfect = !gameOver && pct === 100;
+    if (isPerfect) {
+      playSound('perfect');
+      // 派手な haptic — 5連 confirm
+      for (let i = 0; i < 5; i++) setTimeout(() => hp('confirm'), 80 + i * 90);
+      // 派手なトースト「イキスギィ‼️」
+      showToast('イキスギィ‼️');
+      setTimeout(() => showToast('(≧Д≦)ンァーッ！'), 1500);
+    } else {
+      playSound('result');
+      // 通常 haptic
+      if (gameOver) {
+        hp('error');
+        setTimeout(() => hp('error'), 250);
+      } else if (pct >= 80) {
+        hp('confirm');
+        setTimeout(() => hp('confirm'), 220);
+      } else {
+        hp();
+      }
+    }
+
+    let emoji, verdict, sub;
+    if (gameOver) {
+      emoji = '🚫'; verdict = 'やりませんねぇ‼️'; sub = 'ハートが尽きました。出直してこいください。';
+    } else if (pct === 100) {
+      emoji = '💢'; verdict = 'イキスギィ‼️'; sub = '(≧Д≦)ンァーッ！ 全問正解。獣の中の獣、BEAST of BEASTs。';
+    } else if (pct >= 80) {
+      emoji = '🔥'; verdict = 'やりますねぇ‼️'; sub = 'ほぼ完璧。獣の風格が漂っている。';
+    } else if (pct >= 60) {
+      emoji = '💪'; verdict = 'まずまずですねぇ'; sub = '及第点。次は満点取ろうぜ〜頼むよ〜';
+    } else if (pct >= 40) {
+      emoji = '🤔'; verdict = 'お、そうだな'; sub = 'もう一度よく見ろください…';
+    } else {
+      emoji = '🐶'; verdict = 'クゥーン…'; sub = 'みろよみろよ‼️ 出直しだぞ。';
+    }
+    $('resultEmoji').textContent = emoji;
+    $('resultVerdict').textContent = verdict;
+    $('resultSub').textContent = sub;
+    $('scoreNum').textContent = pct + '%';
+    $('bdCorrect').textContent = session.correct;
+    $('bdWrong').textContent = session.wrong;
+    $('bdStreak').textContent = session.maxStreak;
+    // Perfect-state visual upgrade
+    const resultCard = document.querySelector('.result-card');
+    if (resultCard) resultCard.classList.toggle('perfect', isPerfect);
+    const ring = $('resultRing');
+    const circumference = 2 * Math.PI * 58;
+    ring.style.strokeDashoffset = circumference;
+    setTimeout(() => { ring.style.strokeDashoffset = circumference * (1 - pct / 100); }, 200);
+    if (pct >= 80) ring.setAttribute('stroke', '#8b6f47');
+    else if (pct >= 50) ring.setAttribute('stroke', '#c8a047');
+    else ring.setAttribute('stroke', '#a03828');
+
+    // Practice-mistakes button visibility
+    const practiceBtn = $('practiceMistakes');
+    if (session.mistakeIndices && session.mistakeIndices.length > 0) {
+      practiceBtn.style.display = 'block';
+      practiceBtn.textContent = `⚠️ 間違えた ${session.mistakeIndices.length} 問だけやり直す`;
+    } else {
+      practiceBtn.style.display = 'none';
+    }
+  }
+
+  // ============ Dock navigation ============
+  document.querySelectorAll('.dock-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      // If switching away from an active quiz to home, treat as "back"
+      const inQuiz = $('screen-quiz').classList.contains('active');
+      if (tab === 'home' && inQuiz) {
+        playSound('back');
+      } else {
+        playSound('tap');
+      }
+      hp();
+      document.querySelectorAll('.dock-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (tab === 'home') {
+        session.levelKey = null;
+        showScreen('screen-home');
+        updateRings();
+      } else if (tab === 'stats') {
+        updateStatsScreen();
+        showScreen('screen-stats');
+      } else if (tab === 'settings') {
+        showScreen('screen-settings');
+      }
+    });
+  });
+
+  // ============ Wire up ============
+  $('quizBack').addEventListener('click', () => {
+    playSound('back');
+    hp();
+    session.levelKey = null;
+    document.querySelectorAll('.dock-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === 'home'));
+    showScreen('screen-home');
+    updateRings();
+  });
+  $('backHome').addEventListener('click', () => {
+    playSound('back');
+    hp();
+    session.levelKey = null;
+    showScreen('screen-home');
+  });
+  $('retry').addEventListener('click', () => {
+    playSound('tap');
+    hp();
+    if (session.levelKey) startLevel(session.levelKey);
+  });
+  $('practiceMistakes').addEventListener('click', () => {
+    playSound('tap');
+    hp('confirm');
+    if (session.levelKey && session.mistakeIndices && session.mistakeIndices.length > 0) {
+      startLevel(session.levelKey, { practiceQuestions: session.mistakeIndices.slice() });
+    }
+  });
+  // ============ Reset slider (iOS power-off style) ============
+  (function initResetSlider() {
+    const wrap = $('resetWrap');
+    const knob = $('resetKnob');
+    const inner = $('resetInner');
+    const label = $('resetLabel');
+    const dim = $('resetDim');
+    if (!wrap || !knob) return;
+
+    let isDragging = false;
+    let startX = 0;
+    let knobX = 0;
+    let lastHapticX = 0;
+    let knobWidth = 56;
+    let wrapWidth = 320;
+    let maxOffset = 320 - 56 - 4;
+    let completed = false;
+
+    function errorBurst() {
+      for (let i = 0; i < 5; i++) setTimeout(() => hp('error'), i * 30);
+    }
+
+    function updateSizes() {
+      knobWidth = knob.offsetWidth;
+      wrapWidth = wrap.offsetWidth;
+      maxOffset = wrapWidth - knobWidth - 4;
+    }
+    function setKnobPos(x) {
+      knob.style.left = `${x}px`;
+      inner.style.width = `${72 + x}px`;
+      label.style.opacity = `${Math.max(0, 1 - x / maxOffset)}`;
+    }
+
+    function dragStart(clientX) {
+      if (completed) return;
+      updateSizes();
+      const nowLeft = parseFloat(knob.style.left) || 0;
+      if (nowLeft > 10) return;
+      isDragging = true;
+      startX = clientX;
+      knobX = 0;
+      lastHapticX = 0;
+      knob.style.transition = 'none';
+      inner.style.transition = 'none';
+      label.style.transition = 'opacity 0.2s';
+      dim.classList.add('active');
+      knob.classList.add('active');
+      hp('selection');
+      requestAnimationFrame(loop);
+    }
+    function loop() {
+      if (!isDragging) return;
+      setKnobPos(knobX);
+      requestAnimationFrame(loop);
+    }
+    function dragMove(clientX) {
+      if (!isDragging) return;
+      let dx = clientX - startX;
+      if (dx < 0) dx = 0;
+      knobX = Math.max(0, Math.min(dx, maxOffset));
+      if (Math.abs(knobX - lastHapticX) > 18) {
+        hp('selection');
+        lastHapticX = knobX;
+      }
+    }
+    function dragEnd() {
+      if (!isDragging) return;
+      isDragging = false;
+      knob.classList.remove('active');
+      hp('impact');
+      if (knobX >= maxOffset * 0.9) {
+        completed = true;
+        errorBurst();
+        setTimeout(() => {
+          wrap.classList.add('fade-out');
+          setTimeout(() => {
+            try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+            location.reload();
+          }, 500);
+        }, 80);
+      } else {
+        // snap back
+        knob.style.transition = 'left 0.5s cubic-bezier(.62,0,.4,1)';
+        inner.style.transition = 'width 0.4s cubic-bezier(.62,0,.4,1)';
+        knob.style.left = '4px';
+        inner.style.width = '72px';
+        label.style.opacity = 1;
+        knobX = 0;
+        dim.classList.remove('active');
+      }
+    }
+
+    // Touch
+    knob.addEventListener('touchstart', e => {
+      if (e.touches.length > 0) dragStart(e.touches[0].clientX);
+    }, { passive: true });
+    wrap.addEventListener('touchmove', e => {
+      if (!isDragging) return;
+      e.preventDefault();
+      dragMove(e.touches[0].clientX);
+    }, { passive: false });
+    wrap.addEventListener('touchend', dragEnd);
+    wrap.addEventListener('touchcancel', dragEnd);
+
+    // Mouse
+    knob.addEventListener('mousedown', e => {
+      e.preventDefault();
+      dragStart(e.clientX);
+      document.body.style.userSelect = 'none';
+    });
+    window.addEventListener('mousemove', e => {
+      if (isDragging) dragMove(e.clientX);
+    });
+    window.addEventListener('mouseup', () => {
+      if (!isDragging) return;
+      dragEnd();
+      document.body.style.userSelect = '';
+    });
+    window.addEventListener('mouseleave', () => {
+      if (isDragging) { dragEnd(); document.body.style.userSelect = ''; }
+    });
+
+    window.addEventListener('resize', updateSizes);
+    setTimeout(updateSizes, 50);
+  })();
+
+  // Init
+  function renderPreviewSelect() {
+    const sel = $('previewSelect');
+    sel.innerHTML = '<option value="">レベルを選んで問題を見る…</option>';
+    Object.entries(QUESTIONS).forEach(([key, lv]) => {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = `${lv.icon || '📜'} ${lv.title} (${lv.questions.length}問)`;
+      sel.appendChild(opt);
+    });
+  }
+  function renderPreviewList(levelKey) {
+    const wrap = $('previewList');
+    if (!levelKey || !QUESTIONS[levelKey]) {
+      wrap.innerHTML = '';
+      return;
+    }
+    const lv = QUESTIONS[levelKey];
+    wrap.innerHTML = lv.questions.map((q, i) => {
+      const correct = escapeHtml(q.choices[q.answer] || '');
+      const delay = (i * 80).toString() + 'ms';
+      return `
+        <div class="pv-item" style="animation-delay: ${delay};">
+          <div class="pv-head">
+            <span class="pv-qn">Q${i + 1}</span>
+            <span class="pv-ans">✓ ${correct}</span>
+          </div>
+          <p class="pv-q">${q.problem}</p>
+          <div class="code-block" style="margin-bottom: 0; font-size: 12px; padding: 12px;">${q.code}</div>
+          ${q.explain ? `<p class="pv-explain">${q.explain}</p>` : ''}
+        </div>
+      `;
+    }).join('');
+    // Sync haptic ticks with each row appearing
+    lv.questions.forEach((_, i) => {
+      setTimeout(() => hp('selection'), 80 * i + 100);
+    });
+  }
+
+  // Wire up preview
+  $('previewSelect').addEventListener('change', e => {
+    playSound('chime');
+    hp();
+    renderPreviewList(e.target.value);
+  });
+
+  // Activity card → stats
+  $('activityCard').addEventListener('click', () => {
+    playSound('chime');
+    hp();
+    document.querySelectorAll('.dock-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === 'stats'));
+    updateStatsScreen();
+    showScreen('screen-stats');
+  });
+
+  // Tutorial modal
+  $('howToBtn').addEventListener('click', () => {
+    playSound('chime');
+    hp();
+    $('tutBack').classList.add('show');
+  });
+  $('tutClose').addEventListener('click', () => {
+    playSound('tap');
+    hp();
+    $('tutBack').classList.remove('show');
+  });
+  $('tutBack').addEventListener('click', (e) => {
+    if (e.target === $('tutBack')) {
+      playSound('tap');
+      hp();
+      $('tutBack').classList.remove('show');
+    }
+  });
+
+  // Init
+  logBootInfo();
+  renderHome();
+  renderPreviewSelect();
+  updateRings();
+  updateStatsScreen();
+
+})();
+</script>
+</body>
+</html>

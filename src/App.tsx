@@ -46,7 +46,7 @@ const executeExit = () => {
   setAppState('EXITING');     
   setTimeout(() => {       
     // /assets/ を削除して、ルート直下のファイルを指定します
-    window.location.href = 'beastcode.netlify.app/tt.html';     
+    window.location.href = 'beast-code.netlify.app/tt.html';     
   }, 700);   
 }
 

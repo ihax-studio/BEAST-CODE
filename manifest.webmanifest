@@ -1,0 +1,19 @@
+{
+  "name": "BEAST CODE — 3Dゲームをつくって学ぶ",
+  "short_name": "BEAST CODE",
+  "description": "Progate風コードプレビュー学習。環境構築→HTML/CSS→JS→Three.jsで、クイナ・マリオ2D/3D・FPSの3Dゲームを自分の手で完成させて遊ぶ。",
+  "id": "/",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1e1e2e",
+  "theme_color": "#1e1e2e",
+  "lang": "ja",
+  "categories": ["education", "games", "developer"],
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
