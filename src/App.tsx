@@ -42,15 +42,12 @@ export default function App() {
     setAppState('TUTORIAL');
   };
 
-const executeExit = () => {     
-  setAppState('EXITING');     
-  setTimeout(() => {       
-    // /assets/ を削除して、ルート直下のファイルを指定します
-    window.location.href = 'beast-code.netlify.app/tt.html';     
-  }, 700);   
-}
-
-
+  const executeExit = () => {
+    setAppState('EXITING');
+    setTimeout(() => {
+      window.location.href = 'https://beast-code.netlify.app/tt';
+    }, 700);
+  }
 
   const handleSkip = () => {
     executeExit();
