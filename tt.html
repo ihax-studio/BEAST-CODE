@@ -474,6 +474,41 @@ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Text", "Hira
   .howto .skip2{ width:100%; border:none; border-radius:12px; padding:11px; font-size:13.5px; font-weight:700; cursor:pointer; background:var(--panel); color:var(--txt-dim); }
   .howto .skip2:active,.howto .start:active{ transform:scale(.97); }
 
+  /* ===== 埋め込みウィンドウ（App Storeクイズ / 使い方チュートリアルをiframeで開く） ===== */
+  .embedwrap{ position:fixed; inset:0; z-index:190; display:none; align-items:center; justify-content:center; padding:26px;
+    background:rgba(8,10,20,.5); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+  .embedwrap.show{ display:flex; }
+  .embedwin{ position:relative; width:min(440px,94vw); height:min(760px,88vh); background:#0c0c12; border:.5px solid rgba(255,255,255,.14);
+    border-radius:16px; overflow:hidden; box-shadow:0 40px 90px rgba(0,0,0,.6); display:flex; flex-direction:column;
+    transform:scale(.85); opacity:0; transition:transform .32s cubic-bezier(.2,1.4,.4,1), opacity .32s ease; }
+  .embedwrap.show .embedwin{ transform:none; opacity:1; }
+  .embedwin.wide{ width:min(1000px,94vw); height:min(720px,90vh); }
+  .ebar{ flex:0 0 auto; height:38px; display:flex; align-items:center; justify-content:space-between; padding:0 12px;
+    background:#1c1c22; border-bottom:.5px solid rgba(255,255,255,.08); }
+  .ebar .tl{ display:flex; gap:8px; }
+  .ebar .tl i{ width:12px; height:12px; border-radius:50%; display:block; }
+  .ebar .tl .r{ background:#ff5f57; cursor:pointer; } .ebar .tl .y{ background:#3a3a40; } .ebar .tl .g{ background:#3a3a40; }
+  .ebar .etitle{ font-size:12.5px; font-weight:700; color:var(--txt-dim); }
+  .ebar .espacer{ width:52px; }
+  .eframe{ flex:1 1 auto; width:100%; border:0; background:#fff; display:none; }
+  .eframe.show{ display:block; }
+  /* 使い方チュートリアルの前置き（押すと0.7sでiframeへ） */
+  .eintro{ flex:1 1 auto; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; text-align:center; padding:34px 26px;
+    background:linear-gradient(150deg,var(--panel2),var(--bg2)); transition:opacity .7s ease, transform .7s ease; }
+  .eintro.show{ display:flex; }
+  .eintro.leaving{ opacity:0; transform:scale(1.08); }
+  .eintro .ei-emoji{ font-size:54px; }
+  .eintro .ei-title{ font-size:20px; font-weight:900; color:#fff; }
+  .eintro .ei-sub{ font-size:13.5px; line-height:1.7; color:var(--txt-dim); max-width:300px; }
+  .eintro .ei-btn{ margin-top:8px; border:none; border-radius:12px; padding:13px 30px; font-size:15px; font-weight:800; cursor:pointer;
+    background:linear-gradient(120deg,var(--yellow),var(--peach)); color:#0b1020; }
+  .eintro .ei-btn:active{ transform:scale(.96); }
+  /* ヒント内「見直しますか？」ボタン */
+  .reviewbtn{ display:block; width:100%; margin-top:10px; border:none; border-radius:10px; padding:11px 12px; cursor:pointer; text-align:left;
+    background:rgba(249,226,175,.14); color:var(--yellow); font-family:inherit; font-size:13.5px; font-weight:800; line-height:1.35; }
+  .reviewbtn small{ display:block; margin-top:3px; font-size:11.5px; font-weight:600; color:var(--txt-dim); }
+  .reviewbtn:active{ transform:scale(.98); }
+
   /* ===== コーチマーク＋スポットライト（操作ガイド：フローティング＆視覚的・macOSネイティブ調） ===== */
   .coach{ position:fixed; inset:0; z-index:210; display:none; }
   .coach.show{ display:block; }
@@ -796,7 +831,7 @@ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Text", "Hira
     <img src="./assets/safari.png" data-app="hide" title="ウィンドウを隠す／出す">
     <img src="./assets/photos.png" data-app="info" title="作品">
     <img src="./assets/news.png" data-app="info" title="ニュース">
-    <img src="./assets/appstore.png" data-app="info" title="App Store">
+    <img src="./assets/appstore.png" data-app="quiz" title="穴埋め式クイズ">
     <img src="./assets/facetime.png" data-app="info" title="FaceTime">
     <img src="./assets/helpicon.png" data-app="help" title="ヘルプ（使い方）">
     <span class="divider"></span>
@@ -810,7 +845,7 @@ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Text", "Hira
     <img src="./assets/browser.png" data-app="hide" title="ウィンドウを最小化／戻す">
     <img src="./assets/arcade.png" data-app="games" title="作るものを選ぶ">
     <img src="./assets/notepad.png" data-app="info" title="メモ帳">
-    <img src="./assets/appstore.png" data-app="info" title="ストア">
+    <img src="./assets/appstore.png" data-app="quiz" title="穴埋め式クイズ">
     <img src="./assets/helpicon.png" data-app="help" title="ヘルプ（使い方）">
     <div class="tb-clock" id="tbClock">--:--</div>
   </div>
@@ -896,6 +931,24 @@ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Text", "Hira
     <div class="btns"><button class="mbtn cancel" id="restartCancel">キャンセル</button><button class="mbtn go" id="restartGo">再起動</button></div>
   </div>
 </div>
+<!-- 埋め込みウィンドウ（App Storeクイズ / 使い方チュートリアルをiframeで開く） -->
+<div class="embedwrap" id="embedWrap" aria-hidden="true">
+  <div class="embedwin" id="embedWin">
+    <div class="ebar">
+      <div class="tl"><i class="r" id="embedClose" title="閉じる"></i><i class="y"></i><i class="g"></i></div>
+      <span class="etitle" id="embedTitle">クイズ</span>
+      <span class="espacer"></span>
+    </div>
+    <div class="eintro" id="embedIntro">
+      <div class="ei-emoji">💡</div>
+      <div class="ei-title">コードの書き方を見直しますか？</div>
+      <div class="ei-sub">CSS や JS・HTML ってどうかくの？を、最初から見直せます。</div>
+      <button class="ei-btn" id="embedIntroGo" type="button">見直す ▶</button>
+    </div>
+    <iframe class="eframe" id="embedFrame" title="BEAST" allow="autoplay"></iframe>
+  </div>
+</div>
+
 <!-- boot screen ＝ Apple「hello」手書きアニメ（CSS/JSのみ／BEAST CODE起動UIは廃止） -->
 <div class="helloboot" id="helloboot"><canvas id="hbCanvas"></canvas></div>
 <!-- boot picker (startup disk) -->
@@ -2069,7 +2122,7 @@ function renderLesson(){
   $('phaseTag').textContent = (l.phase||'').toUpperCase();
   $('lzTitle').textContent = l.title||'';
   let body = (l.story||'') + (l.bodyExtra||'');
-  if(l.hint) body += '<div class="hintbox" id="hintbox">💡 '+l.hint+'</div>';
+  if(l.hint) body += '<div class="hintbox" id="hintbox">💡 '+l.hint+'<button class="reviewbtn" id="reviewBtn" type="button">💡 コードの書き方を見直しますか？<small>CSSやJS・HTMLってどうかくの？を見直せます</small></button></div>';
   if(l.type==='code' && l.blank) body += '<div class="answerbox" id="answerbox"><span class="alabel">✅ 解答（答え）</span><pre>'+esc(l.blank.replace(/^\s+/,''))+'</pre><button id="ansFill">✏️ このコードを入れる</button></div>';
   $('lzBody').innerHTML = body;
   const af=$('ansFill'); if(af) af.onclick=()=>{ ta.value=T(l.codeId); state.edits[l.id]=ta.value; save(); syncHL(); renderPreview(draftProject(),{gameHost:!!l.gameHost}); playSound('tap'); toast('解答を入れたよ。▶実行 や 答え合わせ で確認'); };
@@ -2322,8 +2375,56 @@ function appAction(app){
   else if(app==='os'){ showOSScreen(); }
   else if(app==='settings'){ openSettings(); }
   else if(app==='help'){ if(!restoreWindow()) playSound('tap'); showHowto(cur(), true); }
+  else if(app==='quiz'){ openEmbed('quiz'); }
   else { playSound('tap'); toast('このアプリはコースには使わないよ 😉'); }
 }
+
+/* ====== 埋め込みウィンドウ（App Storeクイズ / 使い方チュートリアルをiframeで開く） ====== */
+function openEmbed(kind){
+  const wrap=$('embedWrap'), frame=$('embedFrame'), intro=$('embedIntro'), win=$('embedWin');
+  frame.classList.remove('show'); frame.removeAttribute('src');
+  intro.classList.remove('show','leaving');
+  if(kind==='quiz'){
+    $('embedTitle').textContent='穴埋め式クイズ';
+    win.classList.remove('wide');
+    frame.src='./mobile.html?nr';   // ?nr でmobile→indexリダイレクトを抑止（Mac/PCでもクイズが動く）
+    frame.classList.add('show');
+  } else if(kind==='tutorial'){
+    $('embedTitle').textContent='使い方を見直す';
+    win.classList.remove('wide');
+    intro.classList.add('show');    // 前置きを表示。押すと0.7sでiframeへ
+  }
+  wrap.classList.add('show'); wrap.setAttribute('aria-hidden','false');
+  playSound('winopen');
+}
+function embedIntroStart(){
+  const frame=$('embedFrame'), intro=$('embedIntro'), win=$('embedWin');
+  playSound('tap');
+  intro.classList.add('leaving');   // 0.7sフェード
+  setTimeout(()=>{
+    intro.classList.remove('show','leaving');
+    win.classList.add('wide');
+    frame.src='./index.html?embed=1';   // indexのチュートリアル本体。embed=1で完了/スキップ時は親へ通知
+    frame.classList.add('show');
+  }, 700);
+}
+function closeEmbed(){
+  const wrap=$('embedWrap'), frame=$('embedFrame');
+  if(!wrap.classList.contains('show')) return;
+  wrap.classList.remove('show'); wrap.setAttribute('aria-hidden','true');
+  frame.classList.remove('show'); frame.removeAttribute('src');   // iframe停止（音も止める）
+  $('embedIntro').classList.remove('show','leaving');
+  $('embedWin').classList.remove('wide');
+  playSound('outLevel');
+}
+$('embedClose').addEventListener('click', closeEmbed);
+$('embedIntroGo').addEventListener('click', embedIntroStart);
+$('embedWrap').addEventListener('click', e=>{ if(e.target===$('embedWrap')) closeEmbed(); });
+// ヒント内「見直しますか？」→ 使い方チュートリアルを開く
+document.addEventListener('click', e=>{ if(e.target.closest('#reviewBtn')){ openEmbed('tutorial'); } });
+// チュートリアル(iframe)からの完了/スキップ通知でウィンドウを閉じる → ttへ戻る
+window.addEventListener('message', e=>{ const d=e&&e.data; if(d && d.type==='beast-tutorial-exit'){ closeEmbed(); } });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeEmbed(); });
 function dockClick(e){ const img=e.target.closest('img'); if(!img)return; img.classList.remove('bounce'); void img.offsetWidth; img.classList.add('bounce'); appAction(img.dataset.app); }
 $('dock').addEventListener('click', dockClick);
 $('taskbar').addEventListener('click',e=>{ const t=e.target.closest('[data-app]'); if(t){ appAction(t.dataset.app); } });

@@ -1,10 +1,12 @@
 /* BEAST CODE service worker — auto-updating */
-const VERSION = 'beastcode-v14';
+const VERSION = 'beastcode-v15';
 const CACHE = 'beast-cache-' + VERSION;
 
 const APP_SHELL = [
   './',
   './index.html',
+  './tt.html',
+  './mobile.html',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png',

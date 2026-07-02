@@ -45,7 +45,14 @@ export default function App() {
   const executeExit = () => {
     setAppState('EXITING');
     setTimeout(() => {
-      /* 端末振り分け: スマホは mobile.html、Mac/PC/iPad は tt.html(コード学習本体)へ */
+      /* 埋め込み(iframe)モード: tt.html にウィンドウを閉じてもらう（ここでは遷移しない） */
+      const embedded = window.self !== window.top ||
+        new URLSearchParams(window.location.search).has('embed');
+      if (embedded) {
+        try { window.parent.postMessage({ type: 'beast-tutorial-exit' }, '*'); } catch (e) {}
+        return;
+      }
+      /* 通常モード: スマホは mobile.html、Mac/PC/iPad は tt.html(コード学習本体)へ */
       const ua = navigator.userAgent || '';
       const isIPad = /iPad/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       const isPhone = !isIPad && (/iPhone|iPod/.test(ua) || (/Android/.test(ua) && /Mobile/.test(ua)));
