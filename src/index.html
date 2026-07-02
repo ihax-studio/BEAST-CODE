@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1e1e2e">
+<title>BEAST CODE</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<style>
+  /* 画面全体のスクロールとプルダウン更新を抑制 */
+  html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; overscroll-behavior:none; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="module" src="./main.tsx"></script>
+<script>
+  document.addEventListener('touchmove', function(e){ if(e.touches.length > 1) e.preventDefault(); }, { passive:false });
+  try{ navigator.serviceWorker && navigator.serviceWorker.register('./sw.js').catch(function(){}); }catch(e){}
+</script>
+</body>
+</html>

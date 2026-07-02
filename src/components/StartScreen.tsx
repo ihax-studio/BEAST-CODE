@@ -20,7 +20,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({ mode, onStart, onResum
         transition={{ type: "spring", damping: 20, stiffness: 100 }}
         className="bg-white p-10 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col items-center max-w-[400px] w-full mx-4 text-center"
       >
-        <div className="text-5xl mb-5 text-black"></div>
+        <div className="text-5xl mb-5 text-black">🫨</div>
         
         {mode === 'START' && (
           <div className="w-full flex flex-col items-center">

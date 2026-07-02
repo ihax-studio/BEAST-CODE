@@ -1,5 +1,5 @@
 /* BEAST CODE service worker — auto-updating */
-const VERSION = 'beastcode-v13';
+const VERSION = 'beastcode-v14';
 const CACHE = 'beast-cache-' + VERSION;
 
 const APP_SHELL = [

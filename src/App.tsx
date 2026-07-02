@@ -45,7 +45,11 @@ export default function App() {
   const executeExit = () => {
     setAppState('EXITING');
     setTimeout(() => {
-      window.location.href = 'https://beast-code.netlify.app/tt';
+      /* 端末振り分け: スマホは mobile.html、Mac/PC/iPad は tt.html(コード学習本体)へ */
+      const ua = navigator.userAgent || '';
+      const isIPad = /iPad/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isPhone = !isIPad && (/iPhone|iPod/.test(ua) || (/Android/.test(ua) && /Mobile/.test(ua)));
+      window.location.href = isPhone ? './mobile.html' : './tt.html';
     }, 700);
   }
 
