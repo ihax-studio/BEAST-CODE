@@ -52,11 +52,11 @@ export default function App() {
         try { window.parent.postMessage({ type: 'beast-tutorial-exit' }, '*'); } catch (e) {}
         return;
       }
-      /* 通常モード: スマホは mobile.html、Mac/PC/iPad は tt.html(コード学習本体)へ */
+      /* 通常モード: スマホは mobile.html、Mac/PC/iPad は index.html(=このアプリのホーム)へ。★別Netlifyサイト/tt.htmlには飛ばさない(ユーザ指示: PC行先=index.html) */
       const ua = navigator.userAgent || '';
       const isIPad = /iPad/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       const isPhone = !isIPad && (/iPhone|iPod/.test(ua) || (/Android/.test(ua) && /Mobile/.test(ua)));
-      window.location.href = isPhone ? './mobile.html' : './tt.html';
+      window.location.href = isPhone ? './mobile.html' : './index.html';
     }, 700);
   }
 

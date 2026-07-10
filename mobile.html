@@ -9,9 +9,7 @@
     var isIPad = /iPad/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     var isPhone = !isIPad && (/iPhone|iPod/.test(ua) || (/Android/.test(ua) && /Mobile/.test(ua)));
     if (!isPhone && location.search.indexOf('nr') === -1) {
-      var u = (location.protocol === 'file:')
-        ? 'file:///Users/s_users/Downloads/files/index.html'
-        : 'index.html';
+      var u = 'index.html';
       location.replace(u);
     }
   } catch (e) {}
