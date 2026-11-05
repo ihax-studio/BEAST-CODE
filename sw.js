@@ -11,7 +11,7 @@ const APP_SHELL = [
   './icon-512.png',
   './apple-touch-icon.png',
   './vendor/three.min.js',
-  './vendor/react.production.min.js','./vendor/react-dom.production.min.js','./vendor/sql-wasm.js','./vendor/sql-wasm.wasm',
+  './vendor/react.production.min.js','./vendor/react-dom.production.min.js','./vendor/sql-wasm.js','./vendor/sql-wasm.wasm','./vendor/jquery-3.7.1.min.js',
   './assets/wallpaper.jpg',
   './assets/arcade.png','./assets/controller.png','./assets/safari.png','./assets/photos.png',
   './assets/news.png','./assets/appstore.png','./assets/facetime.png','./assets/mail.png',

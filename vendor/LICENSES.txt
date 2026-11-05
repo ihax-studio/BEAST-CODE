@@ -4,3 +4,4 @@
 - react-dom.production.min.js React DOM 18.3.1    https://github.com/facebook/react
 - babel.min.js            @babel/standalone 7.24.7 https://github.com/babel/babel
 - sql-wasm.js / .wasm     sql.js 1.10.3           https://github.com/sql-js/sql.js
+- jquery-3.7.1.min.js     jQuery 3.7.1            https://github.com/jquery/jquery
