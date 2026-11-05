@@ -9300,7 +9300,7 @@ function showPlanScreen(){
   const card = (t)=>{
     const c=trackDoneCount(t.id);
     const chip = (c.tot && c.dn>=c.tot) ? '<span class="done-chip">✓ 修了</span>' : (c.dn>0 ? '<span class="done-chip">学習中</span>' : '');
-    const n = (TRACK_LESSONS[t.id]||[]).length;
+    const n = lessonsFor({track:t.id}).length;
     return `<div class="plan-card" data-track="${t.id}" tabindex="0"><span class="badge ${t.bcls}">${t.badge}</span>${chip}<div class="pe">${t.se}</div><h3>${t.name}</h3><p>${t.desc}</p><div class="pn">${n} レッスン</div></div>`;
   };
   const avail = LANG_TABS.filter(([k])=> k==='start' || SEL_TRACKS.some(t=>t.lang===k));
