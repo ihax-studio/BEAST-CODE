@@ -1,0 +1,6 @@
+同梱ライブラリ（すべて MIT License）
+- three.min.js            Three.js r128           https://github.com/mrdoob/three.js
+- react.production.min.js React 18.3.1            https://github.com/facebook/react
+- react-dom.production.min.js React DOM 18.3.1    https://github.com/facebook/react
+- babel.min.js            @babel/standalone 7.24.7 https://github.com/babel/babel
+- sql-wasm.js / .wasm     sql.js 1.10.3           https://github.com/sql-js/sql.js

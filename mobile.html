@@ -1,20 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>
-/* 端末振り分け: Mac/PC/iPad は index.html(PC版)へ。スマホ(iPhone/iPod/Androidスマホ)はこのまま。 */
-(function () {
-  try {
-    var ua = navigator.userAgent || '';
-    var isIPad = /iPad/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    var isPhone = !isIPad && (/iPhone|iPod/.test(ua) || (/Android/.test(ua) && /Mobile/.test(ua)));
-    if (!isPhone && location.search.indexOf('nr') === -1) {
-      var u = 'index.html';
-      location.replace(u);
-    }
-  } catch (e) {}
-})();
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -896,13 +882,13 @@
       './icons/pencil.tip.crop.circle.png',
       './icons/chart.pie.png',
       './icons/gear.png',
-      './sounds/outLevel.aif',
-      './sounds/Note_03_F4_Down_230811.wav',
-      './sounds/First_ear_complete-2.wav',
+      './sounds/outlevel.aif',
+      './sounds/note_03_f4_down_230811.wav',
+      './sounds/first_ear_complete-2.wav',
       './sounds/cinema-studio-audio-1782347739500.wav',
       './sounds/home-announcement-recording-begin.caf',
       './sounds/announce-messages-tone-carplay.wav',
-      './sounds/EarInteraction_Complete.caf'
+      './sounds/earinteraction_complete.caf'
     ];
     expectedAssets.forEach(path => {
       fetch(path, { method: 'HEAD' })
@@ -916,13 +902,13 @@
 
   // ============ Audio system ============
   const SOUNDS = {
-    back:    './sounds/outLevel.aif',
-    tap:     './sounds/Note_03_F4_Down_230811.wav',
-    correct: './sounds/First_ear_complete-2.wav',
+    back:    './sounds/outlevel.aif',
+    tap:     './sounds/note_03_f4_down_230811.wav',
+    correct: './sounds/first_ear_complete-2.wav',
     wrong:   './sounds/cinema-studio-audio-1782347739500.wav',
     chime:   './sounds/home-announcement-recording-begin.caf',
     result:  './sounds/announce-messages-tone-carplay.wav',
-    perfect: './sounds/EarInteraction_Complete.caf'
+    perfect: './sounds/earinteraction_complete.caf'
   };
   const audioPool = {};
   function preloadAudio() {
